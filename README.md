@@ -10,6 +10,10 @@ The project is organized as follows:
 .
 ├── src
 │   ├── lib.rs
+│   ├── network
+│   │   ├── error.rs
+│   │   ├── mod.rs
+│   │   └── tests.rs
 │   └── storage
 │       ├── error.rs
 │       ├── mod.rs
@@ -26,5 +30,6 @@ The project is organized as follows:
 
 ## Acknowledgments
 
-A special thanks to:
-1. The [embedded-storage](https://github.com/rust-embedded-community/embedded-storage) project.
+This library draws inspiration from and acknowledges the following open-source projects:
+1. [embedded-storage](https://github.com/rust-embedded-community/embedded-storage)
+2. [embedded-nal](https://github.com/rust-embedded-community/embedded-nal)
