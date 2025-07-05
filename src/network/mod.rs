@@ -12,8 +12,8 @@
 /// Common error types for network operations
 pub mod error;
 
-/// Protocol-specific client implementations
-pub mod client;
+/// Protocol-specific implementations
+pub mod protocol;
 
 /// Re-exports of common traits
 pub mod prelude {

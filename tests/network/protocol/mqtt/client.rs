@@ -1,4 +1,4 @@
-use libiot::network::client::mqtt::{Client, Options};
+use libiot::network::protocol::mqtt::client::{Client, Options};
 use libiot::network::{Close, Connection, Read, Write};
 use std::io::{Read as StdRead, Write as StdWrite};
 use std::net::TcpStream;
@@ -82,7 +82,7 @@ fn test_publish_and_subscribe() {
 
     let topic = "libiot/test-topic";
     let payload = b"hello world";
-    let qos = libiot::network::client::mqtt::QoS::AtMostOnce;
+    let qos = libiot::network::protocol::mqtt::client::QoS::AtMostOnce;
 
     client.subscribe(topic, qos).expect("Failed to subscribe");
 
