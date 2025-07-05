@@ -1,5 +1,5 @@
-use super::error::Error;
-use super::*;
+use libiot::storage::error::Error;
+use libiot::storage::*;
 
 const MOCK_CAPACITY: usize = 1024;
 const ERASED_BYTE: u8 = 0xFF;

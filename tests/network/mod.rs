@@ -1,5 +1,7 @@
-use super::error::Error;
-use super::*;
+use libiot::network::error::Error;
+use libiot::network::*;
+
+pub mod client;
 
 const MOCK_BUFFER_SIZE: usize = 256;
 
@@ -149,12 +151,6 @@ fn test_write_full() {
 
 #[test]
 fn test_op_on_closed_connection() {
-    let mut conn = MockConnection::new();
-    conn.close().unwrap();
-
-    // Now that it's "moved" by close, we can't use it.
-    // To test this properly, we need to re-think the Close trait or the test.
-    // Let's create a new connection for the test.
     let mut conn = MockConnection::new();
     conn.is_open = false; // Manually set for test purposes.
 

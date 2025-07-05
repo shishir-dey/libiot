@@ -74,7 +74,9 @@ pub trait AsyncStorage: AsyncReadStorage {
 }
 #[cfg(feature = "async")]
 pub trait AsyncErase: AsyncStorage {
-    /// Erase a region of the storage asynchronously
+    /// Associated error type
+    type Error: core::fmt::Debug;
+    /// Erase a region of storage asynchronously
     async fn erase(&mut self, from: u32, to: u32) -> Result<(), Self::Error>;
 }
 
@@ -86,7 +88,7 @@ pub trait AsyncErase: AsyncStorage {
 pub trait Eeprom: Storage {
     /// Write a byte with verification
     fn write_verified(&mut self, offset: u32, byte: u8)
-        -> Result<(), <Self as ReadStorage>::Error>;
+    -> Result<(), <Self as ReadStorage>::Error>;
 
     /// Get page size (if applicable)
     fn page_size(&self) -> Option<usize>;
@@ -215,6 +217,3 @@ pub trait AsyncSectorStorage: AsyncStorage + SectorStorage {
         buf: &[u8],
     ) -> Result<(), <Self as AsyncReadStorage>::Error>;
 }
-
-#[cfg(test)]
-mod tests;

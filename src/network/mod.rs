@@ -12,6 +12,9 @@
 /// Common error types for network operations
 pub mod error;
 
+/// Protocol-specific client implementations
+pub mod client;
+
 /// Re-exports of common traits
 pub mod prelude {
     #[cfg(feature = "async")]
@@ -167,6 +170,3 @@ pub trait AsyncQuic: AsyncConnection {}
 pub trait Mcp: Connection {}
 #[cfg(feature = "async")]
 pub trait AsyncMcp: AsyncConnection {}
-
-#[cfg(test)]
-mod tests;
