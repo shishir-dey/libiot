@@ -11,13 +11,20 @@ The project is organized as follows:
 ├── src
 │   ├── lib.rs
 │   ├── network
+│   │   ├── client
+│   │   │   └── mqtt.rs
 │   │   ├── error.rs
-│   │   ├── mod.rs
-│   │   └── tests.rs
+│   │   └── mod.rs
 │   └── storage
 │       ├── error.rs
-│       ├── mod.rs
-│       └── tests.rs
+│       └── mod.rs
+├── tests
+│   ├── network
+│   │   ├── client
+│   │   │   └── mqtt.rs
+│   │   └── mod.rs
+│   └── storage
+│       └── mod.rs
 ├── Cargo.toml
 └── README.md
 ```
