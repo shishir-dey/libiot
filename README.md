@@ -8,6 +8,8 @@ The project is organized as follows:
 
 ```
 .
+├── applications
+│   └── esp32c3-demo
 ├── src
 │   ├── lib.rs
 │   ├── network
@@ -41,6 +43,21 @@ The project is organized as follows:
 ├── Cargo.toml
 └── README.md
 ```
+
+## Usage
+
+### Build Commands
+
+| Command/Alias              | Description                    |
+| -------------------------- | ------------------------------ |
+| `cargo build`              | Build `libiot`                 |
+| `cargo build-esp32c3-demo` | Build the `esp32c3-demo` app   |
+
+### Test Commands
+
+| Command/Alias | Description            |
+| ------------- | ---------------------- |
+| `cargo test`  | Run tests for `libiot` |
 
 ## Tech Stack
 

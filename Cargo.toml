@@ -1,3 +1,10 @@
+[workspace]
+members = [
+    ".",
+    "applications/esp32c3-demo",
+]
+resolver = "2"
+
 [package]
 name = "libiot"
 version = "0.1.0"
