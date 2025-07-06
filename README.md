@@ -21,7 +21,6 @@ The project is organized as follows:
 │   │   │   └── mqtt
 │   │   │       ├── client.rs
 │   │   │       └── mod.rs
-│   │   └── tests.rs
 │   ├── ota
 │   ├── storage
 │   │   ├── error.rs
