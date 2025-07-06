@@ -1,5 +1,7 @@
+use dotenvy::dotenv;
 use libiot::network::protocol::mqtt::client::{Client, Options};
 use libiot::network::{Close, Connection, Read, Write};
+use std::env;
 use std::io::{Read as StdRead, Write as StdWrite};
 use std::net::TcpStream;
 
@@ -46,7 +48,8 @@ impl Connection for NetConnection {}
 
 #[test]
 fn test_connect_to_public_broker() {
-    let address = "test.mosquitto.org:1883";
+    dotenv().ok();
+    let address = env::var("TEST_MQTT_ADDRESS").unwrap_or("test.mosquitto.org:1883".to_string());
     let stream = TcpStream::connect(address).expect("Failed to connect to broker");
     stream
         .set_read_timeout(Some(std::time::Duration::from_secs(5)))
@@ -65,7 +68,8 @@ fn test_connect_to_public_broker() {
 
 #[test]
 fn test_publish_and_subscribe() {
-    let address = "test.mosquitto.org:1883";
+    dotenv().ok();
+    let address = env::var("TEST_MQTT_ADDRESS").unwrap_or("test.mosquitto.org:1883".to_string());
     let stream = TcpStream::connect(address).expect("Failed to connect to broker");
     stream
         .set_read_timeout(Some(std::time::Duration::from_secs(5)))

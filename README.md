@@ -13,19 +13,32 @@ The project is organized as follows:
 │   ├── network
 │   │   ├── error.rs
 │   │   ├── mod.rs
-│   │   └── protocol
-│   │       └── mqtt
-│   │           └── client.rs
-│   └── storage
-│       ├── error.rs
-│       └── mod.rs
+│   │   ├── protocol
+│   │   │   ├── mod.rs
+│   │   │   ├── http
+│   │   │   │   ├── client.rs
+│   │   │   │   └── mod.rs
+│   │   │   └── mqtt
+│   │   │       ├── client.rs
+│   │   │       └── mod.rs
+│   │   └── tests.rs
+│   ├── ota
+│   ├── storage
+│   │   ├── error.rs
+│   │   └── mod.rs
+│   └── system
 ├── tests
 │   ├── network
 │   │   └── protocol
+│   │       └── http
+│   │           ├── client.rs
+│   │           └── mod.rs
 │   │       └── mqtt
-│   │           └── client.rs
+│   │           ├── client.rs
+│   │           └── mod.rs
 │   └── storage
 │       └── mod.rs
+├── .env
 ├── Cargo.toml
 └── README.md
 ```

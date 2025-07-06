@@ -14,3 +14,5 @@ defmt = []
 
 [dev-dependencies]
 futures = { version = "0.3", default-features = false, features = ["alloc", "executor"] }
+dotenvy = "0.15.7"
+
