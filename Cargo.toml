@@ -9,6 +9,15 @@ resolver = "2"
 name = "libiot"
 version = "0.1.0"
 edition = "2024"
+description = "A Rust library that enables any IoT device to securely connect to the cloud, manage data, and interact with cloud services"
+authors = ["Shishir Dey <r0qck3ntp@mozmail.com>"]
+license = "MIT"
+repository = "https://github.com/shishir-dey/libiot"
+homepage = "https://shishir-dey.github.io/libiot/"
+documentation = "https://shishir-dey.github.io/libiot/"
+readme = "README.md"
+keywords = ["iot", "embedded", "no-std", "network", "mqtt"]
+categories = ["embedded", "network-programming", "no-std"]
 
 [dependencies]
 heapless = "0.8.0"
