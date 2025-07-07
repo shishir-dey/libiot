@@ -15,28 +15,40 @@ The project is organized as follows:
 │   ├── network
 │   │   ├── error.rs
 │   │   ├── mod.rs
-│   │   ├── protocol
-│   │   │   ├── mod.rs
-│   │   │   ├── http
-│   │   │   │   ├── client.rs
-│   │   │   │   └── mod.rs
-│   │   │   └── mqtt
-│   │   │       ├── client.rs
-│   │   │       └── mod.rs
+│   │   └── protocol
+│   │       ├── coap
+│   │       │   └── mod.rs
+│   │       ├── http
+│   │       │   ├── client.rs
+│   │       │   └── mod.rs
+│   │       ├── mcp
+│   │       │   └── mod.rs
+│   │       ├── mod.rs
+│   │       ├── mqtt
+│   │       │   ├── client.rs
+│   │       │   └── mod.rs
+│   │       └── websocket
+│   │           └── mod.rs
 │   ├── ota
+│   │   └── mod.rs
 │   ├── storage
 │   │   ├── error.rs
 │   │   └── mod.rs
 │   └── system
+│       ├── mod.rs
+│       └── shell.rs
 ├── tests
+│   ├── mod.rs
 │   ├── network
+│   │   ├── mod.rs
 │   │   └── protocol
-│   │       └── http
-│   │           ├── client.rs
-│   │           └── mod.rs
+│   │       ├── http
+│   │       │   ├── client.rs
+│   │       │   └── mod.rs
+│   │       ├── mod.rs
 │   │       └── mqtt
-│   │           ├── client.rs
-│   │           └── mod.rs
+│   │       │   ├── client.rs
+│   │       │   └── mod.rs
 │   └── storage
 │       └── mod.rs
 ├── .env
