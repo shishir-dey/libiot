@@ -10,6 +10,13 @@ The project is organized as follows:
 .
 ├── applications
 │   └── esp32c3-demo
+├── benches
+│   ├── mod.rs
+│   └── network
+│       └── protocol
+│           └── mqtt
+│               ├── client.rs
+│               └── mod.rs
 ├── src
 │   ├── lib.rs
 │   ├── network
@@ -64,6 +71,12 @@ The project is organized as follows:
 | -------------------------- | ------------------------------ |
 | `cargo build`              | Build `libiot`                 |
 | `cargo build-esp32c3-demo` | Build the `esp32c3-demo` app   |
+
+### Benchmark Commands
+
+| Command/Alias   | Description                          |
+| --------------- | ------------------------------------ |
+| `cargo bench`   | Run all benchmark tests for `libiot` |
 
 ### Test Commands
 
