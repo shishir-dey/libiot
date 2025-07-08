@@ -11,53 +11,26 @@ The project is organized as follows:
 ├── applications
 │   └── esp32c3-demo
 ├── benches
-│   ├── mod.rs
 │   └── network
 │       └── protocol
 │           └── mqtt
-│               ├── client.rs
-│               └── mod.rs
 ├── src
-│   ├── lib.rs
 │   ├── network
-│   │   ├── error.rs
-│   │   ├── mod.rs
 │   │   └── protocol
 │   │       ├── coap
-│   │       │   └── mod.rs
 │   │       ├── http
-│   │       │   ├── client.rs
-│   │       │   └── mod.rs
 │   │       ├── mcp
-│   │       │   └── mod.rs
-│   │       ├── mod.rs
 │   │       ├── mqtt
-│   │       │   ├── client.rs
-│   │       │   └── mod.rs
 │   │       └── websocket
-│   │           └── mod.rs
 │   ├── ota
-│   │   └── mod.rs
 │   ├── storage
-│   │   ├── error.rs
-│   │   └── mod.rs
 │   └── system
-│       ├── mod.rs
-│       └── shell.rs
 ├── tests
-│   ├── mod.rs
 │   ├── network
-│   │   ├── mod.rs
 │   │   └── protocol
 │   │       ├── http
-│   │       │   ├── client.rs
-│   │       │   └── mod.rs
-│   │       ├── mod.rs
 │   │       └── mqtt
-│   │       │   ├── client.rs
-│   │       │   └── mod.rs
 │   └── storage
-│       └── mod.rs
 ├── .env
 ├── Cargo.toml
 └── README.md
