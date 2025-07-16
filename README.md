@@ -12,24 +12,26 @@ The project is organized as follows:
 │   └── esp32c3-demo
 ├── benches
 │   └── network
-│       └── protocol
+│       └── application
 │           └── mqtt
 ├── src
 │   ├── network
-│   │   └── protocol
-│   │       ├── coap
-│   │       ├── http
-│   │       ├── mcp
-│   │       ├── mqtt
-│   │       └── websocket
+│   │   ├── application
+│   │   │   ├── coap
+│   │   │   ├── http
+│   │   │   ├── mcp
+│   │   │   ├── mqtt
+│   │   │   └── websocket
+│   │   └── transport
 │   ├── ota
 │   ├── storage
 │   └── system
 ├── tests
 │   ├── network
-│   │   └── protocol
-│   │       ├── http
-│   │       └── mqtt
+│   │   ├── application
+│   │   │   ├── http
+│   │   │   └── mqtt
+│   │   └── transport
 │   └── storage
 ├── .env
 ├── Cargo.toml

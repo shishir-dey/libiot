@@ -1,6 +1,6 @@
 use criterion::{Criterion, Throughput, criterion_group, criterion_main};
 use dotenvy::dotenv;
-use libiot::network::protocol::mqtt::client::{Client, Options, QoS};
+use libiot::network::application::mqtt::client::{Client, Options, QoS};
 use libiot::network::{Close, Connection, Read, Write};
 use std::env;
 use std::io::{Read as StdRead, Write as StdWrite};
