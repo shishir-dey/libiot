@@ -1,7 +1,8 @@
 use libiot::network::error::Error;
 use libiot::network::*;
 
-pub mod protocol;
+pub mod application;
+pub mod transport;
 
 const MOCK_BUFFER_SIZE: usize = 256;
 

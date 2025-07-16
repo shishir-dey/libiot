@@ -1,5 +1,5 @@
 use dotenvy::dotenv;
-use libiot::network::protocol::http::client::{Client, Method, Request};
+use libiot::network::application::http::client::{Client, Method, Request};
 use libiot::network::{Close, Connection, Read, Write};
 use std::env;
 use std::io::{Read as StdRead, Write as StdWrite};
@@ -60,7 +60,7 @@ fn test_http_get() {
 
     let mut headers = heapless::Vec::new();
     headers
-        .push(libiot::network::protocol::http::client::Header {
+        .push(libiot::network::application::http::client::Header {
             name: heapless::String::try_from("Host").unwrap(),
             value: heapless::String::try_from(address.as_str()).unwrap(),
         })
@@ -92,13 +92,13 @@ fn test_http_post() {
 
     let mut headers = heapless::Vec::new();
     headers
-        .push(libiot::network::protocol::http::client::Header {
+        .push(libiot::network::application::http::client::Header {
             name: heapless::String::try_from("Host").unwrap(),
             value: heapless::String::try_from(address.as_str()).unwrap(),
         })
         .unwrap();
     headers
-        .push(libiot::network::protocol::http::client::Header {
+        .push(libiot::network::application::http::client::Header {
             name: heapless::String::try_from("Content-Type").unwrap(),
             value: heapless::String::try_from("application/json").unwrap(),
         })

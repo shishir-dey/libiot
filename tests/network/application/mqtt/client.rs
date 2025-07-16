@@ -1,5 +1,5 @@
 use dotenvy::dotenv;
-use libiot::network::protocol::mqtt::client::{Client, Options};
+use libiot::network::application::mqtt::client::{Client, Options};
 use libiot::network::{Close, Connection, Read, Write};
 use std::env;
 use std::io::{Read as StdRead, Write as StdWrite};
@@ -86,7 +86,7 @@ fn test_publish_and_subscribe() {
 
     let topic = "libiot/test-topic";
     let payload = b"hello world";
-    let qos = libiot::network::protocol::mqtt::client::QoS::AtMostOnce;
+    let qos = libiot::network::application::mqtt::client::QoS::AtMostOnce;
 
     client.subscribe(topic, qos).expect("Failed to subscribe");
 

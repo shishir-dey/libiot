@@ -12,8 +12,11 @@
 /// Common error types for network operations
 pub mod error;
 
-/// Protocol-specific implementations
-pub mod protocol;
+/// OSI Layer 7: Application
+pub mod application;
+
+/// OSI Layer 4: Transport
+pub mod transport;
 
 /// Re-exports of common traits
 pub mod prelude {
