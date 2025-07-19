@@ -1,2 +1,0 @@
-[alias]
-build-esp32c3-demo = "build --package esp32c3-demo --target riscv32imc-unknown-none-elf --release"

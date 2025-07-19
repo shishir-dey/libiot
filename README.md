@@ -8,8 +8,6 @@ The project is organized as follows:
 
 ```
 .
-├── applications
-│   └── esp32c3-demo
 ├── benches
 │   └── network
 │       └── application
@@ -42,10 +40,9 @@ The project is organized as follows:
 
 ### Build Commands
 
-| Command/Alias              | Description                    |
-| -------------------------- | ------------------------------ |
-| `cargo build`              | Build `libiot`                 |
-| `cargo build-esp32c3-demo` | Build the `esp32c3-demo` app   |
+| Command/Alias | Description    |
+| ------------- | -------------- |
+| `cargo build` | Build `libiot` |
 
 ### Benchmark Commands
 
