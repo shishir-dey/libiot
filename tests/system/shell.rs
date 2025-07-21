@@ -43,6 +43,29 @@ fn fail_command_handler(_argc: usize, _argv: &[&str]) -> ShellResult {
     ShellResult::InvalidParameter
 }
 
+/// Test command handler that captures arguments for verification
+static CAPTURED_ARGS: OnceLock<Arc<Mutex<Option<Vec<String>>>>> = OnceLock::new();
+
+fn get_captured_args_buffer() -> &'static Arc<Mutex<Option<Vec<String>>>> {
+    CAPTURED_ARGS.get_or_init(|| Arc::new(Mutex::new(None)))
+}
+
+fn capture_args_handler(argc: usize, argv: &[&str]) -> ShellResult {
+    let buffer = get_captured_args_buffer();
+    *buffer.lock().unwrap() = Some(argv[1..argc].iter().map(|s| s.to_string()).collect());
+    ShellResult::Ok
+}
+
+fn get_captured_args() -> Vec<String> {
+    let buffer = get_captured_args_buffer();
+    buffer.lock().unwrap().take().unwrap_or_default()
+}
+
+fn clear_captured_args() {
+    let buffer = get_captured_args_buffer();
+    *buffer.lock().unwrap() = None;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -584,5 +607,85 @@ mod tests {
         let cloned = cmd.clone();
         assert_eq!(cloned.name, "test");
         assert_eq!(cloned.description, "Test command");
+    }
+
+    #[test]
+    fn test_quoted_string_missing_closing_quote_bug() {
+        clear_captured_args();
+        let mut shell = Shell::new();
+        shell.register_command("capture", "Capture args", capture_args_handler);
+
+        // This should handle the unclosed quote gracefully, not drop the argument
+        let result = shell.input(b"capture \"hello world\r");
+        assert_eq!(result, ShellResult::Ok);
+
+        let args = get_captured_args();
+
+        assert_eq!(
+            args.len(),
+            1,
+            "Unclosed quoted argument should still be captured"
+        );
+        assert_eq!(
+            args[0], "hello world",
+            "Unclosed quoted argument should contain expected content"
+        );
+    }
+
+    #[test]
+    fn test_escaped_quotes_in_quoted_strings_bug() {
+        clear_captured_args();
+        let mut shell = Shell::new();
+        shell.register_command("capture", "Capture args", capture_args_handler);
+
+        // Test escaped quotes within quoted strings
+        let result = shell.input(b"capture \"hello \\\"world\\\" test\"\r");
+        assert_eq!(result, ShellResult::Ok);
+
+        let args = get_captured_args();
+        assert_eq!(args.len(), 1);
+
+        assert_eq!(
+            args[0], "hello \"world\" test",
+            "Escaped quotes should be preserved as literal quotes"
+        );
+    }
+
+    #[test]
+    fn test_escaped_backslash_in_quoted_strings_bug() {
+        clear_captured_args();
+        let mut shell = Shell::new();
+        shell.register_command("capture", "Capture args", capture_args_handler);
+
+        // Test escaped backslashes
+        let result = shell.input(b"capture \"path\\\\to\\\\file\"\r");
+        assert_eq!(result, ShellResult::Ok);
+
+        let args = get_captured_args();
+        assert_eq!(args.len(), 1);
+
+        assert_eq!(
+            args[0], "path\\to\\file",
+            "Escaped backslashes should be preserved as literal backslashes"
+        );
+    }
+
+    #[test]
+    fn test_mixed_escaped_characters_bug() {
+        clear_captured_args();
+        let mut shell = Shell::new();
+        shell.register_command("capture", "Capture args", capture_args_handler);
+
+        // Test various escape sequences
+        let result = shell.input(b"capture \"say \\\"hello\\\" and \\\\goodbye\\\\\"\r");
+        assert_eq!(result, ShellResult::Ok);
+
+        let args = get_captured_args();
+        assert_eq!(args.len(), 1);
+
+        assert_eq!(
+            args[0], "say \"hello\" and \\goodbye\\",
+            "Mixed escape sequences should be handled correctly"
+        );
     }
 }

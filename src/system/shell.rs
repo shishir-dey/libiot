@@ -221,28 +221,58 @@ impl Shell {
                 break;
             }
 
-            let start = i;
-
             // Handle quoted arguments
             if self.buffer[i] == b'"' {
                 i += 1; // Skip opening quote
-                let arg_start = i;
+                let arg_start = self.argc; // Store the argument index for this quoted string
+                let mut write_pos = i; // Position where we write processed characters
+                let read_start = i; // Remember where this argument content starts
 
                 while i < self.buffer_len {
                     if self.buffer[i] == b'\\' && i + 1 < self.buffer_len {
-                        i += 2; // Skip escaped character
+                        // Handle escape sequences
+                        i += 1; // Skip the backslash
+                        let escaped_char = self.buffer[i];
+                        match escaped_char {
+                            b'"' => self.buffer[write_pos] = b'"', // Escaped quote becomes literal quote
+                            b'\\' => self.buffer[write_pos] = b'\\', // Escaped backslash becomes literal backslash
+                            b'n' => self.buffer[write_pos] = b'\n',  // Escaped n becomes newline
+                            b't' => self.buffer[write_pos] = b'\t',  // Escaped t becomes tab
+                            b'r' => self.buffer[write_pos] = b'\r', // Escaped r becomes carriage return
+                            _ => {
+                                // For unrecognized escape sequences, keep the escaped character as-is
+                                self.buffer[write_pos] = escaped_char;
+                            }
+                        }
+                        write_pos += 1;
+                        i += 1;
                     } else if self.buffer[i] == b'"' {
-                        self.argv_starts[self.argc] = arg_start;
-                        self.argv_lens[self.argc] = i - arg_start;
+                        // Found closing quote
+                        self.argv_starts[self.argc] = read_start;
+                        self.argv_lens[self.argc] = write_pos - read_start;
                         self.argc += 1;
                         i += 1; // Skip closing quote
                         break;
                     } else {
+                        // Regular character - copy it if we're compacting due to escape sequences
+                        if write_pos != i {
+                            self.buffer[write_pos] = self.buffer[i];
+                        }
+                        write_pos += 1;
                         i += 1;
                     }
                 }
+
+                // Handle unclosed quoted strings - still add the argument
+                if i >= self.buffer_len && self.argc == arg_start {
+                    // We reached end of buffer without finding closing quote
+                    self.argv_starts[self.argc] = read_start;
+                    self.argv_lens[self.argc] = write_pos - read_start;
+                    self.argc += 1;
+                }
             } else {
                 // Handle unquoted arguments
+                let start = i;
                 while i < self.buffer_len && self.buffer[i] != ASCII_SPACE {
                     if self.buffer[i] == b'"' {
                         // Quote in the middle - treat as end of argument
