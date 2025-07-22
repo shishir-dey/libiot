@@ -24,13 +24,17 @@ The project is organized as follows:
 │   ├── ota
 │   ├── storage
 │   └── system
+│       └── shell
 ├── tests
 │   ├── network
 │   │   ├── application
 │   │   │   ├── http
 │   │   │   └── mqtt
+│   │   │   └── mcp
 │   │   └── transport
 │   └── storage
+│   └── system
+│       └── shell
 ├── .env
 ├── Cargo.toml
 └── README.md
