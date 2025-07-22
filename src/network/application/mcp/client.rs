@@ -81,10 +81,14 @@ where
                 b'"' => in_string = !in_string,
                 b'{' if !in_string => brace_count += 1,
                 b'}' if !in_string => {
-                    brace_count -= 1;
-                    if brace_count == 0 {
-                        return true;
+                    if brace_count > 0 {
+                        brace_count -= 1;
+                        if brace_count == 0 {
+                            return true;
+                        }
                     }
+                    // If brace_count is 0 and we encounter '}', ignore it
+                    // as it indicates malformed JSON (extra closing brace)
                 }
                 _ => {}
             }
