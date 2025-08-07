@@ -26,7 +26,7 @@
 //! ## Simple GET Request
 //!
 //! ```rust,no_run
-//! use libiot::network::application::http::{Client, Request, Method};
+//! use libiot::network::application::http::client::{Client, Request, Method};
 //! # use libiot::network::Connection;
 //! # struct MockConnection;
 //! # impl Connection for MockConnection {}
@@ -61,7 +61,7 @@
 //! ## POST Request with JSON Body
 //!
 //! ```rust,no_run
-//! use libiot::network::application::http::{Client, Request, Method, Header};
+//! use libiot::network::application::http::client::{Client, Request, Method, Header};
 //! # use libiot::network::Connection;
 //! # struct MockConnection;
 //! # impl Connection for MockConnection {}

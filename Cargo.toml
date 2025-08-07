@@ -18,6 +18,8 @@ heapless = "0.8.0"
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 serde-json-core = "0.6"
 defmt = { version = "0.3", optional = true }
+base64ct = { version = "1.6.0", default-features = false }
+crc32fast = { version = "1.4.2", default-features = false }
 
 [features]
 default = []
@@ -29,6 +31,7 @@ defmt = ["dep:defmt"]
 futures = { version = "0.3", default-features = false, features = ["alloc", "executor"] }
 dotenvy = "0.15.7"
 criterion = { version = "0.6.0", features = ["html_reports"] }
+rand = "0.8.5"
 
 [[bench]]
 name = "bench_suite"
