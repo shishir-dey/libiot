@@ -38,43 +38,86 @@ impl Close for MockConnection {
 impl Connection for MockConnection {}
 
 struct MockPlatform {
-    firmware: [u8; 4096],
-    firmware_len: usize,
-    firmware_activated: bool,
+    partitions: [Partition; 2],
+    active_partition_index: usize,
+    boot_partition_index: usize,
+    ota_data: OtaData,
+    firmware: [u8; 8192],
 }
 
 impl Default for MockPlatform {
     fn default() -> Self {
         Self {
-            firmware: [0u8; 4096],
-            firmware_len: 0,
-            firmware_activated: false,
+            partitions: [
+                Partition { start: 0, size: 4096 },
+                Partition { start: 4096, size: 4096 },
+            ],
+            active_partition_index: 0,
+            boot_partition_index: 0,
+            ota_data: OtaData {
+                state: OtaState::Idle,
+                version: 0,
+                checksum: 0,
+            },
+            firmware: [0u8; 8192],
         }
     }
 }
 
 impl Platform for MockPlatform {
-    fn save_firmware_chunk(&mut self, chunk: &[u8]) -> Result<(), Error> {
-        let new_len = self.firmware_len + chunk.len();
-        if new_len > self.firmware.len() {
+    fn get_active_partition(&self) -> Partition {
+        self.partitions[self.active_partition_index]
+    }
+
+    fn get_inactive_partition(&self) -> Partition {
+        self.partitions[1 - self.active_partition_index]
+    }
+
+    fn set_boot_partition(&mut self, partition: Partition) -> Result<(), Error> {
+        if partition == self.partitions[0] {
+            self.boot_partition_index = 0;
+        } else if partition == self.partitions[1] {
+            self.boot_partition_index = 1;
+        } else {
+            return Err(Error::PlatformError);
+        }
+        Ok(())
+    }
+
+    fn get_ota_data(&self) -> Result<OtaData, Error> {
+        Ok(self.ota_data.clone())
+    }
+
+    fn set_ota_data(&mut self, data: &OtaData) -> Result<(), Error> {
+        self.ota_data = data.clone();
+        Ok(())
+    }
+
+    fn save_firmware_chunk(&mut self, offset: u32, chunk: &[u8]) -> Result<(), Error> {
+        let inactive_partition = self.get_inactive_partition();
+        let start = inactive_partition.start as usize;
+        let offset = offset as usize;
+        let new_len = offset + chunk.len();
+        if new_len > inactive_partition.size as usize {
             return Err(Error::DownloadError);
         }
-        self.firmware[self.firmware_len..new_len].copy_from_slice(chunk);
-        self.firmware_len = new_len;
+        self.firmware[start + offset..start + new_len].copy_from_slice(chunk);
         Ok(())
     }
 
     fn read_firmware_chunk(&self, offset: u32, length: u32) -> Result<&[u8], Error> {
+        let inactive_partition = self.get_inactive_partition();
+        let start = inactive_partition.start as usize;
         let offset = offset as usize;
         let length = length as usize;
-        if offset + length > self.firmware_len {
+        if offset + length > inactive_partition.size as usize {
             return Err(Error::VerificationError);
         }
-        Ok(&self.firmware[offset..offset + length])
+        Ok(&self.firmware[start + offset..start + offset + length])
     }
 
     fn activate_firmware(&mut self) -> Result<(), Error> {
-        self.firmware_activated = true;
+        self.active_partition_index = self.boot_partition_index;
         Ok(())
     }
 }
@@ -107,96 +150,46 @@ fn test_ota_update() {
     assert_eq!(*agent.state(), State::Downloading(firmware.clone()));
 
     // Manually save the firmware to the mock platform
-    agent.platform.save_firmware_chunk(&firmware_data).unwrap();
+    agent.platform.save_firmware_chunk(0, &firmware_data).unwrap();
 
     agent.process_event(Event::DownloadComplete).unwrap();
     assert_eq!(*agent.state(), State::Verifying(firmware.clone()));
 
     agent.process_event(Event::VerificationComplete).unwrap();
     assert_eq!(*agent.state(), State::Activating);
-    assert!(agent.platform.firmware_activated);
+    assert!(agent.platform.get_ota_data().unwrap().state == OtaState::Pending);
 
     agent.process_event(Event::ActivationComplete).unwrap();
     assert_eq!(*agent.state(), State::Idle);
 }
 
-struct ChaosConnection {
-    data: [u8; 1024],
-    read_pos: usize,
-    write_pos: usize,
-    drop_rate: u8,
-    corrupt_rate: u8,
-}
-
-impl ChaosConnection {
-    fn new(drop_rate: u8, corrupt_rate: u8) -> Self {
-        Self {
-            data: [0u8; 1024],
-            read_pos: 0,
-            write_pos: 0,
-            drop_rate,
-            corrupt_rate,
-        }
-    }
-}
-
-impl Read for ChaosConnection {
-    type Error = ();
-
-    fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
-        if rand::thread_rng().gen_range(0..100) < self.drop_rate {
-            return Ok(0); // Simulate dropped packet
-        }
-
-        let bytes_to_read = core::cmp::min(buf.len(), self.write_pos - self.read_pos);
-        let slice = &self.data[self.read_pos..self.read_pos + bytes_to_read];
-
-        if rand::thread_rng().gen_range(0..100) < self.corrupt_rate {
-            let mut corrupted_data = [0u8; 1024];
-            corrupted_data[..bytes_to_read].copy_from_slice(slice);
-            corrupted_data[0] = !corrupted_data[0];
-            buf[..bytes_to_read].copy_from_slice(&corrupted_data[..bytes_to_read]);
-        } else {
-            buf[..bytes_to_read].copy_from_slice(slice);
-        }
-
-        self.read_pos += bytes_to_read;
-        Ok(bytes_to_read)
-    }
-}
-
-impl Write for ChaosConnection {
-    type Error = ();
-
-    fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
-        let bytes_to_write = core::cmp::min(buf.len(), self.data.len() - self.write_pos);
-        self.data[self.write_pos..self.write_pos + bytes_to_write].copy_from_slice(&buf[..bytes_to_write]);
-        self.write_pos += bytes_to_write;
-        Ok(bytes_to_write)
-    }
-
-    fn flush(&mut self) -> Result<(), Self::Error> {
-        Ok(())
-    }
-}
-
-impl Close for ChaosConnection {
-    type Error = ();
-
-    fn close(self) -> Result<(), Self::Error> {
-        Ok(())
-    }
-}
-
-impl Connection for ChaosConnection {}
-
 #[test]
-fn test_ota_with_chaos() {
-    let connection = ChaosConnection::new(50, 50); // 50% drop rate, 50% corrupt rate
+fn test_ota_ab_flow() {
     let platform = MockPlatform::default();
-    let _ota_manager = OtaManager::new(connection, platform);
+    let connection = MockConnection;
+    let mut ota_manager = OtaManager::new(connection, platform);
 
-    // We can't easily test the run loop, but we can test the agent directly
-    // with a connection that is lossy.
-    // This requires a more advanced test setup, which is out of scope for now.
+    // Simulate a successful update
+    let mut firmware = ota_manager.agent.request_update().unwrap().unwrap();
+    let mut hasher = Hasher::new();
+    let mut firmware_data = [0u8; 1024];
+    for i in 0..1024 {
+        firmware_data[i] = i as u8;
+    }
+    hasher.update(&firmware_data);
+    firmware.checksum = hasher.finalize();
+
+    ota_manager.agent.process_event(Event::UpdateAvailable(firmware.clone())).unwrap();
+    ota_manager.agent.platform.save_firmware_chunk(0, &firmware_data).unwrap();
+    ota_manager.agent.process_event(Event::DownloadComplete).unwrap();
+    ota_manager.agent.process_event(Event::VerificationComplete).unwrap();
+    ota_manager.agent.process_event(Event::ActivationComplete).unwrap();
+
+    // After reboot, the OtaManager should be created again.
+    // The `new` function should handle the post-reboot logic.
+    let connection2 = MockConnection;
+    let mut ota_manager2 = OtaManager::new(connection2, ota_manager.agent.platform);
+
+    assert_eq!(ota_manager2.agent.platform.get_ota_data().unwrap().state, OtaState::Success);
+    assert_eq!(ota_manager2.agent.platform.get_active_partition(), ota_manager2.agent.platform.partitions[1]);
 }

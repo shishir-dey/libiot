@@ -30,9 +30,53 @@
 //! platform-specific functionality, such as saving the firmware image to flash
 //! storage and rebooting the device.
 use crate::network::Connection;
+use crate::storage::Region;
 use heapless::String;
 use core::str::FromStr;
 use base64ct::{Base64, Encoding as B64Encoding};
+
+/// Represents a partition on a storage device.
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub struct Partition {
+    /// The start address of the partition.
+    pub start: u32,
+    /// The size of the partition in bytes.
+    pub size: u32,
+}
+
+impl Region for Partition {
+    fn start(&self) -> u32 {
+        self.start
+    }
+
+    fn end(&self) -> u32 {
+        self.start + self.size
+    }
+}
+
+/// Represents the state of the OTA update.
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum OtaState {
+    /// No OTA update is in progress.
+    Idle,
+    /// An OTA update is pending and will be applied on the next reboot.
+    Pending,
+    /// The OTA update was successful.
+    Success,
+    /// The OTA update failed.
+    Failed,
+}
+
+/// Represents the OTA metadata that is stored in a non-volatile storage.
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct OtaData {
+    /// The state of the OTA update.
+    pub state: OtaState,
+    /// The version of the firmware in the inactive partition.
+    pub version: u32,
+    /// The checksum of the firmware in the inactive partition.
+    pub checksum: u32,
+}
 
 /// Represents the state of the OTA agent.
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -69,6 +113,8 @@ pub enum Error {
     VerificationError,
     /// An error occurred while activating the new firmware image.
     ActivationError,
+    /// A platform-specific error occurred.
+    PlatformError,
 }
 
 /// The encoding of the firmware image.
@@ -100,10 +146,25 @@ pub struct Firmware {
 /// This trait must be implemented by the target platform to provide the
 /// necessary functionality for the OTA agent to work.
 pub trait Platform {
-    /// Saves a chunk of the firmware image to flash storage.
-    fn save_firmware_chunk(&mut self, chunk: &[u8]) -> Result<(), Error>;
+    /// Gets the active partition.
+    fn get_active_partition(&self) -> Partition;
 
-    /// Reads a chunk of the firmware image from flash storage.
+    /// Gets the inactive partition.
+    fn get_inactive_partition(&self) -> Partition;
+
+    /// Sets the partition that should be booted on the next reboot.
+    fn set_boot_partition(&mut self, partition: Partition) -> Result<(), Error>;
+
+    /// Gets the OTA metadata.
+    fn get_ota_data(&self) -> Result<OtaData, Error>;
+
+    /// Sets the OTA metadata.
+    fn set_ota_data(&mut self, data: &OtaData) -> Result<(), Error>;
+
+    /// Saves a chunk of the firmware image to the inactive partition.
+    fn save_firmware_chunk(&mut self, offset: u32, chunk: &[u8]) -> Result<(), Error>;
+
+    /// Reads a chunk of the firmware image from the inactive partition.
     fn read_firmware_chunk(&self, offset: u32, length: u32) -> Result<&[u8], Error>;
 
     /// Activates the new firmware image.
@@ -183,6 +244,7 @@ impl<P: Platform> OtaAgent<P> {
 
     /// Downloads the firmware image from the server.
     fn download_firmware(&mut self, firmware: &Firmware) -> Result<(), Error> {
+        let _inactive_partition = self.platform.get_inactive_partition();
         let mut buffer = [0u8; 1024];
         let mut bytes_downloaded = 0;
 
@@ -201,24 +263,32 @@ impl<P: Platform> OtaAgent<P> {
 
             match firmware.encoding {
                 Encoding::Raw => {
-                    self.platform.save_firmware_chunk(&buffer[..bytes_read])?;
+                    self.platform.save_firmware_chunk(bytes_downloaded, &buffer[..bytes_read])?;
                 }
                 Encoding::Base64 => {
                     let mut decoded_buffer = [0u8; 1024];
                     let decoded_len = Base64::decode(&buffer[..bytes_read], &mut decoded_buffer)
                         .map_err(|_| Error::DownloadError)?
                         .len();
-                    self.platform.save_firmware_chunk(&decoded_buffer[..decoded_len])?;
+                    self.platform.save_firmware_chunk(bytes_downloaded, &decoded_buffer[..decoded_len])?;
                 }
             }
             bytes_downloaded += bytes_read as u32;
         }
+
+        let ota_data = OtaData {
+            state: OtaState::Pending,
+            version: firmware.version,
+            checksum: firmware.checksum,
+        };
+        self.platform.set_ota_data(&ota_data)?;
 
         Ok(())
     }
 
     /// Verifies the integrity of the firmware image.
     fn verify_firmware(&mut self, firmware_size: u32, expected_checksum: u32) -> Result<(), Error> {
+        let _inactive_partition = self.platform.get_inactive_partition();
         let mut hasher = crc32fast::Hasher::new();
         let mut bytes_verified = 0;
 
@@ -232,12 +302,20 @@ impl<P: Platform> OtaAgent<P> {
         if checksum == expected_checksum {
             Ok(())
         } else {
+            let ota_data = OtaData {
+                state: OtaState::Failed,
+                version: 0,
+                checksum: 0,
+            };
+            self.platform.set_ota_data(&ota_data)?;
             Err(Error::VerificationError)
         }
     }
 
     /// Activates the new firmware image.
     fn activate_firmware(&mut self) -> Result<(), Error> {
+        let inactive_partition = self.platform.get_inactive_partition();
+        self.platform.set_boot_partition(inactive_partition)?;
         self.platform.activate_firmware()
     }
 }
@@ -254,7 +332,17 @@ pub struct OtaManager<C: Connection, P: Platform> {
 
 impl<C: Connection, P: Platform> OtaManager<C, P> {
     /// Creates a new OTA manager.
-    pub fn new(connection: C, platform: P) -> Self {
+    pub fn new(connection: C, mut platform: P) -> Self {
+        if let Ok(mut ota_data) = platform.get_ota_data() {
+            if ota_data.state == OtaState::Pending {
+                // The new firmware has been booted. We can now mark the update
+                // as successful. In a real application, we would run some
+                // self-tests here to verify the new firmware.
+                ota_data.state = OtaState::Success;
+                platform.set_ota_data(&ota_data).unwrap();
+            }
+        }
+
         Self {
             connection,
             agent: OtaAgent::new(platform),
