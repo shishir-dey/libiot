@@ -34,7 +34,7 @@
 //! ### Basic HTTP Client Example
 //!
 //! ```rust,no_run
-//! use libiot::network::application::http::{Client, Request, Method};
+//! use libiot::network::application::http::client::{Client, Request, Method};
 //! # use libiot::network::Connection;
 //! # struct MockConnection;
 //! # impl Connection for MockConnection {}
@@ -68,7 +68,7 @@
 //! ### MQTT Client Example
 //!
 //! ```rust,no_run
-//! use libiot::network::application::mqtt::{Client, Options, QoS};
+//! use libiot::network::application::mqtt::client::{Client, Options, QoS};
 //! # use libiot::network::Connection;
 //! # struct MockConnection;
 //! # impl Connection for MockConnection {}
@@ -120,6 +120,9 @@
 /// This module contains implementations for various network protocols commonly used
 /// in IoT applications, including HTTP, MQTT, WebSocket, CoAP, and MCP.
 pub mod network;
+
+/// Over-the-Air (OTA) update agent
+pub mod ota;
 
 /// Storage abstraction layer for various memory and storage devices.
 ///
