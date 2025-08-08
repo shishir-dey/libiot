@@ -19,7 +19,9 @@
 //!   their boot process after a successful download and verification.
 //! - The bundled HTTP client limits response body capacity to 2048 bytes.
 //!   OTA here uses HTTP range requests with a configurable `chunk_size` that
-//!   must be <= 2048 to operate within these limits.
+//!   must be <= 2048 to operate within these limits. Servers MUST honor
+//!   HTTP Range requests and return 206 Partial Content with a valid
+//!   `Content-Range` header. Full-body 200 responses are not accepted.
 
 #![allow(missing_docs)]
 #![deny(unsafe_code)]
@@ -185,8 +187,8 @@ impl Ota {
     }
 
     /// Download the firmware from the HTTP source into `storage` starting at
-    /// `base_offset`. If `progress_topic` and `mqtt` are provided, progress is
-    /// published as small JSON messages: {"bytes":N,"total":T,"state":"downloading"}
+    /// `base_offset`. If `mqtt` is provided, progress is published as small JSON
+    /// messages: {"bytes":N,"total":T,"state":"downloading"}
     pub fn run_http<HC, S, MC>(
         &mut self,
         http: &mut HttpClient<HC>,
@@ -200,21 +202,41 @@ impl Ota {
         MC: crate::network::Connection,
         S: Storage + BlockingErase,
     {
+        // Validate source size and bounds early
+        if source.size == 0 {
+            self.state = State::Failed;
+            return Err(Error::InvalidConfig);
+        }
+
+        // Ensure base_offset + size fits within u32 and storage capacity
+        let end_offset_u32 = (base_offset as u64)
+            .checked_add(source.size as u64)
+            .ok_or(Error::InvalidConfig)? as u32;
+        let storage_capacity = storage.capacity();
+        let end_offset_usize = (base_offset as usize)
+            .checked_add(source.size)
+            .ok_or(Error::InvalidConfig)?;
+        if end_offset_usize > storage_capacity {
+            self.state = State::Failed;
+            return Err(Error::InvalidConfig);
+        }
+
         if self.canceled {
             self.state = State::Canceled;
             return Err(Error::Canceled);
         }
 
-        // Erase
+        // Erase (end-exclusive per BlockingErase contract)
         if self.cfg.erase_before_write {
             self.state = State::Erasing;
             if self.canceled {
                 self.state = State::Canceled;
                 return Err(Error::Canceled);
             }
-            storage
-                .erase(base_offset, base_offset + (source.size as u32))
-                .map_err(|_| Error::Storage(storage_err::Error::EraseError))?;
+            storage.erase(base_offset, end_offset_u32).map_err(|_| {
+                self.state = State::Failed;
+                Error::Storage(storage_err::Error::EraseError)
+            })?;
         }
 
         // Download in ranges
@@ -235,17 +257,22 @@ impl Ota {
 
             let mut headers: Vec<Header, 16> = Vec::new();
             let host_header = Header {
-                name: String::<MAX_HEADER_NAME_LEN>::try_from("Host").unwrap(),
-                value: String::<MAX_HEADER_VALUE_LEN>::try_from(source.host).unwrap(),
+                name: String::<MAX_HEADER_NAME_LEN>::try_from("Host")
+                    .map_err(|_| Error::Protocol)?,
+                value: String::<MAX_HEADER_VALUE_LEN>::try_from(source.host)
+                    .map_err(|_| Error::Protocol)?,
             };
             headers.push(host_header).map_err(|_| Error::Protocol)?;
 
-            let mut range_value: String<64> = String::new();
+            let mut range_value: String<80> = String::new();
             // bytes=start-end
-            let _ = core::fmt::write(&mut range_value, format_args!("bytes={}-{}", start, end));
+            core::fmt::write(&mut range_value, format_args!("bytes={}-{}", start, end))
+                .map_err(|_| Error::Protocol)?;
             let range_header = Header {
-                name: String::<MAX_HEADER_NAME_LEN>::try_from("Range").unwrap(),
-                value: String::<MAX_HEADER_VALUE_LEN>::try_from(range_value.as_str()).unwrap(),
+                name: String::<MAX_HEADER_NAME_LEN>::try_from("Range")
+                    .map_err(|_| Error::Protocol)?,
+                value: String::<MAX_HEADER_VALUE_LEN>::try_from(range_value.as_str())
+                    .map_err(|_| Error::Protocol)?,
             };
             headers.push(range_header).map_err(|_| Error::Protocol)?;
 
@@ -256,22 +283,95 @@ impl Ota {
                 body: None,
             };
 
-            let resp = http.request(&req)?;
+            // Minimal retry loop for transient network errors per chunk
+            let mut attempt = 0;
+            let resp = loop {
+                match http.request(&req) {
+                    Ok(r) => break r,
+                    Err(e) => {
+                        attempt += 1;
+                        if attempt >= 3 {
+                            self.state = State::Failed;
+                            return Err(Error::Network(e));
+                        }
+                        // simple immediate retry without backoff
+                        continue;
+                    }
+                }
+            };
             match resp.status_code {
-                200 | 206 => {}
-                _ => return Err(Error::Network(net_err::Error::ProtocolError)),
+                206 => {
+                    // Validate Content-Range matches the requested start..=end and total size
+                    let mut content_range_ok = false;
+                    let mut header_total: Option<usize> = None;
+                    for h in &resp.headers {
+                        if h.name.as_str().eq_ignore_ascii_case("Content-Range") {
+                            if let Some((rs, re, total)) = parse_content_range(h.value.as_str()) {
+                                header_total = total;
+                                if rs == start && re == end {
+                                    content_range_ok = true;
+                                }
+                            }
+                        }
+                    }
+                    if !content_range_ok {
+                        self.state = State::Failed;
+                        return Err(Error::Network(net_err::Error::ProtocolError));
+                    }
+                    if let Some(t) = header_total {
+                        if t != source.size {
+                            self.state = State::Failed;
+                            return Err(Error::Network(net_err::Error::ProtocolError));
+                        }
+                    }
+                }
+                _ => {
+                    // Require ranged transfers for OTA
+                    self.state = State::Failed;
+                    return Err(Error::Network(net_err::Error::ProtocolError));
+                }
             }
 
             // Limit body length to requested len; client may read more if server ignores range
             let chunk = &resp.body[..core::cmp::min(resp.body.len(), len)];
             if chunk.is_empty() {
+                self.state = State::Failed;
                 return Err(Error::Network(net_err::Error::ReadError));
+            }
+            // For 206 responses, we expect exact length
+            if resp.status_code == 206 && chunk.len() != len {
+                self.state = State::Failed;
+                return Err(Error::Network(net_err::Error::ProtocolError));
+            }
+            let chunk = chunk;
+
+            // Compute absolute write offset safely
+            let start_u32: u32 = (start as u64).try_into().map_err(|_| {
+                self.state = State::Failed;
+                Error::InvalidConfig
+            })?;
+            let abs_off = base_offset.checked_add(start_u32).ok_or_else(|| {
+                self.state = State::Failed;
+                Error::InvalidConfig
+            })?;
+            let base_offset_usize = base_offset as usize;
+            let abs_end_usize = base_offset_usize
+                .checked_add(start)
+                .and_then(|v| v.checked_add(chunk.len()))
+                .ok_or_else(|| {
+                    self.state = State::Failed;
+                    Error::InvalidConfig
+                })?;
+            if abs_end_usize > end_offset_usize {
+                self.state = State::Failed;
+                return Err(Error::InvalidConfig);
             }
 
             // Write to storage at base_offset + start
-            storage
-                .write(base_offset + (start as u32), chunk)
-                .map_err(|_| Error::Storage(storage_err::Error::WriteError))?;
+            storage.write(abs_off, chunk).map_err(|_| {
+                self.state = State::Failed;
+                Error::Storage(storage_err::Error::WriteError)
+            })?;
 
             // Update CRC and counters
             crc.update(chunk);
@@ -285,6 +385,8 @@ impl Ota {
                     state: State::Downloading,
                 });
             }
+
+            // Continue until all requested ranges are downloaded
         }
 
         // Verify
@@ -327,6 +429,45 @@ impl Ota {
         }
         Ok(())
     }
+}
+
+/// Parse an HTTP Content-Range header of the form:
+/// "bytes start-end/total" or "bytes start-end/*"
+/// Returns (start, end, Some(total)) if total is known, otherwise total is None.
+fn parse_content_range(value: &str) -> Option<(usize, usize, Option<usize>)> {
+    // Expected formats (case-insensitive unit):
+    // bytes start-end/total
+    // bytes start-end/*
+    let v = value.trim();
+    // Normalize unit prefix
+    let lower = v.to_ascii_lowercase();
+    let rest = lower.strip_prefix("bytes")?;
+    // Derive the rest slice from original string to keep original digits
+    let start_idx = v.len() - rest.len();
+    let v_rest = &v[start_idx..].trim();
+    // Now expect start-end/total
+    let mut parts = v_rest.split('/');
+    let range_part = parts.next()?.trim();
+    let total_part = parts.next()?.trim();
+    let mut se = range_part.split('-');
+    let start_str = se.next()?.trim();
+    let end_str = se.next()?.trim();
+    let start = start_str.parse::<usize>().ok()?;
+    let end = end_str.parse::<usize>().ok()?;
+    if end < start {
+        return None;
+    }
+    let total = if total_part == "*" {
+        None
+    } else {
+        let t = total_part.parse::<usize>().ok()?;
+        // Bounds relative to total if provided
+        if start >= t || end >= t {
+            return None;
+        }
+        Some(t)
+    };
+    Some((start, end, total))
 }
 
 /// Helper for reporting OTA progress via MQTT.

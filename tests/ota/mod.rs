@@ -114,12 +114,12 @@ impl ChaosConnection {
                 }
             }
         }
-        let (status, body) = if let Some((s, e)) = range {
-            (206u16, &self.object[s..=e])
+        let (status, body, content_range) = if let Some((s, e)) = range {
+            (206u16, &self.object[s..=e], Some((s, e, self.object.len())))
         } else {
-            (200u16, &self.object[..])
+            (200u16, &self.object[..], None)
         };
-        let resp = build_http_response(status, body, true);
+        let resp = build_http_response(status, body, true, content_range);
         self.incoming.extend_from_slice(&resp);
         self.written.clear();
         self.delivered_in_phase = 0;
@@ -172,13 +172,21 @@ impl Close for ChaosConnection {
 
 impl Connection for ChaosConnection {}
 
-fn build_http_response(status: u16, body: &[u8], content_length: bool) -> std::vec::Vec<u8> {
+fn build_http_response(
+    status: u16,
+    body: &[u8],
+    content_length: bool,
+    content_range: Option<(usize, usize, usize)>,
+) -> std::vec::Vec<u8> {
     let mut out = std::vec::Vec::new();
     match status {
         200 => out.extend_from_slice(b"HTTP/1.1 200 OK\r\n"),
         206 => out.extend_from_slice(b"HTTP/1.1 206 Partial Content\r\n"),
         _ => out.extend_from_slice(b"HTTP/1.1 500 Error\r\n"),
     };
+    if let Some((s, e, total)) = content_range {
+        out.extend_from_slice(format!("Content-Range: bytes {}-{}/{}\r\n", s, e, total).as_bytes());
+    }
     if content_length {
         out.extend_from_slice(format!("Content-Length: {}\r\n", body.len()).as_bytes());
     }
