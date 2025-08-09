@@ -132,3 +132,6 @@ pub mod storage;
 /// Contains tools like command shell interfaces and system management utilities
 /// that are commonly needed in IoT device firmware.
 pub mod system;
+
+/// Over-the-air (OTA) update logic combining network and storage layers.
+pub mod ota;
