@@ -135,3 +135,5 @@ pub mod system;
 
 /// Over-the-air (OTA) update logic combining network and storage layers.
 pub mod ota;
+
+pub mod gps;
