@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["MAX_ARGS_LEN","MAX_FUNCTIONS","MAX_FUNCTION_NAME_LEN","MAX_RESPONSE_LEN"],"enum":["McpError","ResponseStatus"],"mod":["client","handlers"],"struct":["FunctionRegistry","McpMessage","McpResponse"],"trait":["McpHandler"],"type":["HandlerResult"]};

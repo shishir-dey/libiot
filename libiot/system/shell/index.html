@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Command shell interface for embedded systems."><title>libiot::system::shell - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-7dc20aaa.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="libiot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.91.0-nightly (809200ec9 2025-08-24)" data-channel="nightly" data-search-js="search-5fc2c5c0.js" data-stringdex-js="stringdex-0e748618.js" data-settings-js="settings-c38705f0.js" ><script src="../../../static.files/storage-e2aeef58.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../static.files/main-17c00ba7.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Module shell</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../../libiot/index.html">libiot</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module shell</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#features" title="Features">Features</a></li><li><a href="#architecture" title="Architecture">Architecture</a></li><li><a href="#usage-examples" title="Usage Examples">Usage Examples</a><ul><li><a href="#basic-shell-setup" title="Basic Shell Setup">Basic Shell Setup</a></li><li><a href="#static-command-registration" title="Static Command Registration">Static Command Registration</a></li><li><a href="#advanced-argument-parsing" title="Advanced Argument Parsing">Advanced Argument Parsing</a></li></ul></li></ul><h3><a href="#structs">Module Items</a></h3><ul class="block"><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li><li><a href="#constants" title="Constants">Constants</a></li><li><a href="#types" title="Type Aliases">Type Aliases</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="../index.html">In libiot::<wbr>system</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../../index.html">libiot</a>::<wbr><a href="../index.html">system</a></div><h1>Module <span>shell</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../../src/libiot/system/shell.rs.html#1-962">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Command shell interface for embedded systems.</p>
+<p>Provides a complete command-line interface implementation with support for
+command registration, argument parsing, help system, and interactive input processing.
+Command shell interface for embedded systems.</p>
+<p>This module provides a complete command-line interface implementation designed
+for embedded systems and <code>no_std</code> environments. It supports command registration,
+argument parsing, help system, and extensible command handling.</p>
+<h2 id="features"><a class="doc-anchor" href="#features">§</a>Features</h2>
+<ul>
+<li><strong>Zero-allocation</strong>: Uses fixed-size buffers for predictable memory usage</li>
+<li><strong>Command Registration</strong>: Support for both static and dynamic command registration</li>
+<li><strong>Argument Parsing</strong>: Handles quoted arguments and escape sequences</li>
+<li><strong>Help System</strong>: Built-in help for individual commands and command listing</li>
+<li><strong>Input Processing</strong>: Character-by-character input processing with echo support</li>
+<li><strong>Extensible</strong>: Easy to add custom commands and modify behavior</li>
+</ul>
+<h2 id="architecture"><a class="doc-anchor" href="#architecture">§</a>Architecture</h2>
+<p>The shell consists of several key components:</p>
+<div class="example-wrap"><pre class="language-text"><code>┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Input Layer   │───▶│  Argument       │───▶│   Command       │
+│   (Character    │    │  Parser         │    │   Registry      │
+│   Processing)   │    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Line Buffer   │    │   Argument      │    │   Command       │
+│   Management    │    │   Storage       │    │   Execution     │
+└─────────────────┘    └─────────────────┘    └─────────────────┘</code></pre></div><h2 id="usage-examples"><a class="doc-anchor" href="#usage-examples">§</a>Usage Examples</h2><h3 id="basic-shell-setup"><a class="doc-anchor" href="#basic-shell-setup">§</a>Basic Shell Setup</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>libiot::system::shell::{Shell, Command, ShellResult};
+
+<span class="kw">fn </span>hello_command(argc: usize, argv: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str]) -&gt; ShellResult {
+    <span class="kw">if </span>argc &gt; <span class="number">1 </span>{
+        <span class="macro">println!</span>(<span class="string">"Hello, {}!"</span>, argv[<span class="number">1</span>]);
+    } <span class="kw">else </span>{
+        <span class="macro">println!</span>(<span class="string">"Hello, World!"</span>);
+    }
+    ShellResult::Ok
+}
+
+<span class="kw">fn </span>output_handler(text: <span class="kw-2">&amp;</span>str) {
+    <span class="macro">print!</span>(<span class="string">"{}"</span>, text);
+}
+
+<span class="kw">let </span><span class="kw-2">mut </span>shell = Shell::new();
+shell.set_output_function(output_handler);
+shell.register_command(<span class="string">"hello"</span>, <span class="string">"Say hello"</span>, hello_command).unwrap();
+
+<span class="comment">// Process input character by character
+</span><span class="kw">let </span>input = <span class="string">b"hello world\r"</span>;
+shell.input(input).unwrap();</code></pre></div>
+<h3 id="static-command-registration"><a class="doc-anchor" href="#static-command-registration">§</a>Static Command Registration</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>libiot::system::shell::{Shell, Command, ShellResult};
+
+<span class="kw">fn </span>status_cmd(argc: usize, argv: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str]) -&gt; ShellResult {
+    <span class="macro">println!</span>(<span class="string">"System status: OK"</span>);
+    ShellResult::Ok
+}
+
+<span class="kw">fn </span>reset_cmd(argc: usize, argv: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str]) -&gt; ShellResult {
+    <span class="macro">println!</span>(<span class="string">"System reset requested"</span>);
+    ShellResult::Ok
+}
+
+<span class="kw">const </span>STATIC_COMMANDS: <span class="kw-2">&amp;</span>[Command] = <span class="kw-2">&amp;</span>[
+    Command { name: <span class="string">"status"</span>, description: <span class="string">"Show system status"</span>, handler: status_cmd },
+    Command { name: <span class="string">"reset"</span>, description: <span class="string">"Reset the system"</span>, handler: reset_cmd },
+];
+
+<span class="kw">let </span><span class="kw-2">mut </span>shell = Shell::new();
+shell.register_static_commands(STATIC_COMMANDS).unwrap();</code></pre></div>
+<h3 id="advanced-argument-parsing"><a class="doc-anchor" href="#advanced-argument-parsing">§</a>Advanced Argument Parsing</h3>
+<p>The shell supports quoted arguments and escape sequences:</p>
+<div class="example-wrap"><pre class="language-text"><code>&gt; echo &quot;Hello World&quot;           # Quoted argument with spaces
+&gt; config set &quot;device name&quot; &quot;My Device&quot;  # Multiple quoted arguments
+&gt; echo &quot;Line 1\nLine 2&quot;        # Escape sequences within quotes
+&gt; path &quot;C:\\Program Files&quot;     # Escaped backslashes</code></pre></div></div></details><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.Command.html" title="struct libiot::system::shell::Command">Command</a></dt><dd>Command structure containing metadata and handler function.</dd><dt><a class="struct" href="struct.Shell.html" title="struct libiot::system::shell::Shell">Shell</a></dt><dd>Main shell structure managing input processing and command execution.</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.ShellResult.html" title="enum libiot::system::shell::ShellResult">Shell<wbr>Result</a></dt><dd>Result type for shell operations.</dd></dl><h2 id="constants" class="section-header">Constants<a href="#constants" class="anchor">§</a></h2><dl class="item-table"><dt><a class="constant" href="constant.ASCII_BACKSPACE.html" title="constant libiot::system::shell::ASCII_BACKSPACE">ASCII_<wbr>BACKSPACE</a></dt><dd>ASCII backspace character (0x08).</dd><dt><a class="constant" href="constant.ASCII_CR.html" title="constant libiot::system::shell::ASCII_CR">ASCII_<wbr>CR</a></dt><dd>ASCII carriage return character (0x0D).</dd><dt><a class="constant" href="constant.ASCII_DEL.html" title="constant libiot::system::shell::ASCII_DEL">ASCII_<wbr>DEL</a></dt><dd>ASCII delete character (0x7F).</dd><dt><a class="constant" href="constant.ASCII_LF.html" title="constant libiot::system::shell::ASCII_LF">ASCII_<wbr>LF</a></dt><dd>ASCII line feed character (0x0A).</dd><dt><a class="constant" href="constant.ASCII_SPACE.html" title="constant libiot::system::shell::ASCII_SPACE">ASCII_<wbr>SPACE</a></dt><dd>ASCII space character (0x20).</dd><dt><a class="constant" href="constant.MAX_ARGS.html" title="constant libiot::system::shell::MAX_ARGS">MAX_<wbr>ARGS</a></dt><dd>Maximum number of arguments per command.</dd><dt><a class="constant" href="constant.MAX_BUFFER_SIZE.html" title="constant libiot::system::shell::MAX_BUFFER_SIZE">MAX_<wbr>BUFFER_<wbr>SIZE</a></dt><dd>Maximum buffer size for input command lines.</dd><dt><a class="constant" href="constant.MAX_DYNAMIC_COMMANDS.html" title="constant libiot::system::shell::MAX_DYNAMIC_COMMANDS">MAX_<wbr>DYNAMIC_<wbr>COMMANDS</a></dt><dd>Maximum number of dynamic commands that can be registered.</dd></dl><h2 id="types" class="section-header">Type Aliases<a href="#types" class="anchor">§</a></h2><dl class="item-table"><dt><a class="type" href="type.CommandFn.html" title="type libiot::system::shell::CommandFn">Command<wbr>Fn</a></dt><dd>Function signature for command handlers.</dd><dt><a class="type" href="type.OutputFn.html" title="type libiot::system::shell::OutputFn">Output<wbr>Fn</a></dt><dd>Function signature for output handlers.</dd></dl></section></div></main></body></html>

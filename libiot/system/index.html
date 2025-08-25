@@ -1,0 +1,37 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="System utilities for embedded devices."><title>libiot::system - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-7dc20aaa.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="libiot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.91.0-nightly (809200ec9 2025-08-24)" data-channel="nightly" data-search-js="search-5fc2c5c0.js" data-stringdex-js="stringdex-0e748618.js" data-settings-js="settings-c38705f0.js" ><script src="../../static.files/storage-e2aeef58.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../static.files/main-17c00ba7.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Module system</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../libiot/index.html">libiot</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module system</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#available-utilities" title="Available Utilities">Available Utilities</a></li><li><a href="#design-principles" title="Design Principles">Design Principles</a></li><li><a href="#usage" title="Usage">Usage</a></li></ul><h3><a href="#modules">Module Items</a></h3><ul class="block"><li><a href="#modules" title="Modules">Modules</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="../index.html">In crate libiot</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">libiot</a></div><h1>Module <span>system</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/libiot/system/mod.rs.html#1-44">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>System utilities for embedded devices.</p>
+<p>Contains tools like command shell interfaces and system management utilities
+that are commonly needed in IoT device firmware.
+System utilities for embedded devices.</p>
+<p>This module provides essential system-level utilities and interfaces commonly
+needed in embedded IoT applications. It focuses on providing lightweight,
+<code>no_std</code> compatible tools for device management and user interaction.</p>
+<h2 id="available-utilities"><a class="doc-anchor" href="#available-utilities">§</a>Available Utilities</h2>
+<ul>
+<li><strong>[<code>shell</code>]</strong>: Command-line interface implementation for embedded systems</li>
+</ul>
+<h2 id="design-principles"><a class="doc-anchor" href="#design-principles">§</a>Design Principles</h2>
+<ul>
+<li><strong>Embedded-First</strong>: All utilities are designed for resource-constrained environments</li>
+<li><strong>Zero-Allocation</strong>: Fixed-size buffers and stack-based operations</li>
+<li><strong>Configurable</strong>: Features can be enabled/disabled as needed</li>
+<li><strong>Portable</strong>: Works across different embedded platforms and architectures</li>
+</ul>
+<h2 id="usage"><a class="doc-anchor" href="#usage">§</a>Usage</h2>
+<p>The system utilities are designed to be used independently or together
+to build complete embedded applications:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>libiot::system::shell::{Shell, ShellResult};
+
+<span class="comment">// Set up a command shell for device interaction
+</span><span class="kw">let </span><span class="kw-2">mut </span>shell = Shell::new();
+shell.set_output_function(|text| {
+    <span class="comment">// Send to UART or other output
+    </span><span class="macro">print!</span>(<span class="string">"{}"</span>, text);
+});
+
+<span class="comment">// Register device-specific commands
+</span>shell.register_command(<span class="string">"status"</span>, <span class="string">"Show device status"</span>, |<span class="kw">_</span>, <span class="kw">_</span>| {
+    <span class="macro">println!</span>(<span class="string">"Device: Online"</span>);
+    ShellResult::Ok
+}).unwrap();</code></pre></div>
+</div></details><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><dl class="item-table"><dt><a class="mod" href="shell/index.html" title="mod libiot::system::shell">shell</a></dt><dd>Command shell interface for embedded systems.</dd></dl></section></div></main></body></html>

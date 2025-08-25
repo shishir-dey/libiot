@@ -1,0 +1,78 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="NAND Flash specific operations."><title>NandFlash in libiot::storage - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-7dc20aaa.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="libiot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.91.0-nightly (809200ec9 2025-08-24)" data-channel="nightly" data-search-js="search-5fc2c5c0.js" data-stringdex-js="stringdex-0e748618.js" data-settings-js="settings-c38705f0.js" ><script src="../../static.files/storage-e2aeef58.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-17c00ba7.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">NandFlash</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../libiot/index.html">libiot</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Nand<wbr>Flash</a></h2><h3><a href="#required-methods">Required Methods</a></h3><ul class="block"><li><a href="#tymethod.block_status" title="block_status">block_status</a></li><li><a href="#tymethod.read_spare" title="read_spare">read_spare</a></li><li><a href="#tymethod.write_with_spare" title="write_with_spare">write_with_spare</a></li></ul><h3><a href="#implementors">Implementors</a></h3></section><div id="rustdoc-modnav"><h2><a href="index.html">In libiot::<wbr>storage</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">libiot</a>::<wbr><a href="index.html">storage</a></div><h1>Trait <span class="trait">Nand<wbr>Flash</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/libiot/storage/mod.rs.html#618-679">Source</a> </span></div><pre class="rust item-decl"><code>pub trait NandFlash: <a class="trait" href="trait.Storage.html" title="trait libiot::storage::Storage">Storage</a> + <a class="trait" href="trait.BlockStorage.html" title="trait libiot::storage::BlockStorage">BlockStorage</a> {
+    // Required methods
+    fn <a href="#tymethod.read_spare" class="fn">read_spare</a>(
+        &amp;mut self,
+        block: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>,
+        page: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>,
+        spare: &amp;mut [<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a>],
+    ) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>, &lt;Self as <a class="trait" href="trait.ReadStorage.html" title="trait libiot::storage::ReadStorage">ReadStorage</a>&gt;::<a class="associatedtype" href="trait.ReadStorage.html#associatedtype.Error" title="type libiot::storage::ReadStorage::Error">Error</a>&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.write_with_spare" class="fn">write_with_spare</a>(
+        &amp;mut self,
+        block: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>,
+        page: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>,
+        data: &amp;[<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a>],
+        spare: &amp;[<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a>],
+    ) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>, &lt;Self as <a class="trait" href="trait.ReadStorage.html" title="trait libiot::storage::ReadStorage">ReadStorage</a>&gt;::<a class="associatedtype" href="trait.ReadStorage.html#associatedtype.Error" title="type libiot::storage::ReadStorage::Error">Error</a>&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.block_status" class="fn">block_status</a>(
+        &amp;mut self,
+        block: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>,
+    ) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="enum" href="enum.BlockStatus.html" title="enum libiot::storage::BlockStatus">BlockStatus</a>, &lt;Self as <a class="trait" href="trait.ReadStorage.html" title="trait libiot::storage::ReadStorage">ReadStorage</a>&gt;::<a class="associatedtype" href="trait.ReadStorage.html#associatedtype.Error" title="type libiot::storage::ReadStorage::Error">Error</a>&gt;;
+}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>NAND Flash specific operations.</p>
+<p>NAND Flash memory has unique characteristics including spare areas
+for metadata and bad block management that require specialized operations.</p>
+</div></details><h2 id="required-methods" class="section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="tymethod.read_spare" class="method"><a class="src rightside" href="../../src/libiot/storage/mod.rs.html#634-639">Source</a><h4 class="code-header">fn <a href="#tymethod.read_spare" class="fn">read_spare</a>(
+    &amp;mut self,
+    block: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>,
+    page: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>,
+    spare: &amp;mut [<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a>],
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>, &lt;Self as <a class="trait" href="trait.ReadStorage.html" title="trait libiot::storage::ReadStorage">ReadStorage</a>&gt;::<a class="associatedtype" href="trait.ReadStorage.html#associatedtype.Error" title="type libiot::storage::ReadStorage::Error">Error</a>&gt;</h4></section></summary><div class="docblock"><p>Read spare area data from a specific page.</p>
+<p>NAND Flash pages have main data areas and spare areas for metadata
+such as error correction codes and bad block markers.</p>
+<h5 id="arguments"><a class="doc-anchor" href="#arguments">§</a>Arguments</h5>
+<ul>
+<li><code>block</code> - Block number</li>
+<li><code>page</code> - Page number within the block</li>
+<li><code>spare</code> - Buffer to read spare data into</li>
+</ul>
+<h5 id="returns"><a class="doc-anchor" href="#returns">§</a>Returns</h5>
+<ul>
+<li><code>Ok(())</code> - Spare data read successfully</li>
+<li><code>Err(error)</code> - Read operation failed</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.write_with_spare" class="method"><a class="src rightside" href="../../src/libiot/storage/mod.rs.html#657-663">Source</a><h4 class="code-header">fn <a href="#tymethod.write_with_spare" class="fn">write_with_spare</a>(
+    &amp;mut self,
+    block: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>,
+    page: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>,
+    data: &amp;[<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a>],
+    spare: &amp;[<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a>],
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>, &lt;Self as <a class="trait" href="trait.ReadStorage.html" title="trait libiot::storage::ReadStorage">ReadStorage</a>&gt;::<a class="associatedtype" href="trait.ReadStorage.html#associatedtype.Error" title="type libiot::storage::ReadStorage::Error">Error</a>&gt;</h4></section></summary><div class="docblock"><p>Write data with spare area.</p>
+<p>Writes both main data and spare area data to a page. This is
+commonly used to write error correction codes along with the data.</p>
+<h5 id="arguments-1"><a class="doc-anchor" href="#arguments-1">§</a>Arguments</h5>
+<ul>
+<li><code>block</code> - Block number</li>
+<li><code>page</code> - Page number within the block</li>
+<li><code>data</code> - Main data to write</li>
+<li><code>spare</code> - Spare area data to write</li>
+</ul>
+<h5 id="returns-1"><a class="doc-anchor" href="#returns-1">§</a>Returns</h5>
+<ul>
+<li><code>Ok(())</code> - Data written successfully</li>
+<li><code>Err(error)</code> - Write operation failed</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.block_status" class="method"><a class="src rightside" href="../../src/libiot/storage/mod.rs.html#678">Source</a><h4 class="code-header">fn <a href="#tymethod.block_status" class="fn">block_status</a>(
+    &amp;mut self,
+    block: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="enum" href="enum.BlockStatus.html" title="enum libiot::storage::BlockStatus">BlockStatus</a>, &lt;Self as <a class="trait" href="trait.ReadStorage.html" title="trait libiot::storage::ReadStorage">ReadStorage</a>&gt;::<a class="associatedtype" href="trait.ReadStorage.html#associatedtype.Error" title="type libiot::storage::ReadStorage::Error">Error</a>&gt;</h4></section></summary><div class="docblock"><p>Check if a block is good or bad.</p>
+<p>NAND Flash can develop bad blocks over time. This function
+checks the block status to determine if it’s safe to use.</p>
+<h5 id="arguments-2"><a class="doc-anchor" href="#arguments-2">§</a>Arguments</h5>
+<ul>
+<li><code>block</code> - Block number to check</li>
+</ul>
+<h5 id="returns-2"><a class="doc-anchor" href="#returns-2">§</a>Returns</h5>
+<ul>
+<li><code>Ok(status)</code> - Block status</li>
+<li><code>Err(error)</code> - Failed to check block status</li>
+</ul>
+</div></details></div><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"></div><script src="../../trait.impl/libiot/storage/trait.NandFlash.js" async></script></section></div></main></body></html>

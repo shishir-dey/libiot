@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="OSI Layer 7: Application layer protocol implementations"><title>libiot::network::application - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-7dc20aaa.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="libiot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.91.0-nightly (809200ec9 2025-08-24)" data-channel="nightly" data-search-js="search-5fc2c5c0.js" data-stringdex-js="stringdex-0e748618.js" data-settings-js="settings-c38705f0.js" ><script src="../../../static.files/storage-e2aeef58.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../static.files/main-17c00ba7.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Module application</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../../libiot/index.html">libiot</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module application</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#application-layer-network-protocols" title="Application Layer Network Protocols">Application Layer Network Protocols</a><ul><li><a href="#available-protocols" title="Available Protocols">Available Protocols</a></li><li><a href="#design-principles" title="Design Principles">Design Principles</a></li><li><a href="#usage-pattern" title="Usage Pattern">Usage Pattern</a></li></ul></li></ul><h3><a href="#modules">Module Items</a></h3><ul class="block"><li><a href="#modules" title="Modules">Modules</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="../index.html">In libiot::<wbr>network</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../../index.html">libiot</a>::<wbr><a href="../index.html">network</a></div><h1>Module <span>application</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../../src/libiot/network/application/mod.rs.html#1-95">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>OSI Layer 7: Application layer protocol implementations</p>
+<h2 id="application-layer-network-protocols"><a class="doc-anchor" href="#application-layer-network-protocols">§</a>Application Layer Network Protocols</h2>
+<p>This module contains implementations of various application layer (OSI Layer 7)
+network protocols commonly used in IoT applications. Each protocol is designed
+to work with the core network traits and provide a consistent API for embedded systems.</p>
+<h3 id="available-protocols"><a class="doc-anchor" href="#available-protocols">§</a>Available Protocols</h3>
+<ul>
+<li><strong>[<code>http</code>]</strong>: HTTP/1.1 client implementation for RESTful API communication</li>
+<li><strong>[<code>mqtt</code>]</strong>: MQTT 3.1.1 client for lightweight publish-subscribe messaging</li>
+<li><strong>[<code>mcp</code>]</strong>: Model Context Protocol client for AI/LLM integration</li>
+<li><strong>[<code>websocket</code>]</strong>: WebSocket protocol for real-time bidirectional communication</li>
+<li><strong>[<code>coap</code>]</strong>: Constrained Application Protocol for resource-limited devices</li>
+</ul>
+<h3 id="design-principles"><a class="doc-anchor" href="#design-principles">§</a>Design Principles</h3>
+<p>All protocol implementations in this module follow these principles:</p>
+<ul>
+<li><strong>Connection Agnostic</strong>: Work with any type implementing <a href="../trait.Connection.html" title="trait libiot::network::Connection"><code>Connection</code></a></li>
+<li><strong>No-std Compatible</strong>: Designed for embedded systems without heap allocation</li>
+<li><strong>Resource Conscious</strong>: Use fixed-size buffers and minimal memory</li>
+<li><strong>Error Handling</strong>: Comprehensive error types for robust applications</li>
+</ul>
+<h3 id="usage-pattern"><a class="doc-anchor" href="#usage-pattern">§</a>Usage Pattern</h3>
+<p>Most protocol clients follow a similar pattern:</p>
+<ol>
+<li>Create a connection using your transport layer</li>
+<li>Wrap it with the protocol client</li>
+<li>Use protocol-specific methods for communication</li>
+</ol>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>libiot::network::application::http::{Client, Request, Method};
+
+<span class="comment">// 1. Create connection (implementation-specific)
+</span><span class="kw">let </span>connection = MockConnection;
+
+<span class="comment">// 2. Wrap with protocol client
+</span><span class="kw">let </span><span class="kw-2">mut </span>client = Client::new(connection);
+
+<span class="comment">// 3. Use protocol methods
+</span><span class="kw">let </span>request = Request {
+    method: Method::Get,
+    path: <span class="string">"/api/status"</span>,
+    headers: heapless::Vec::new(),
+    body: <span class="prelude-val">None</span>,
+};
+<span class="comment">// let response = client.request(&amp;request)?;</span></code></pre></div>
+</div></details><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><dl class="item-table"><dt><a class="mod" href="coap/index.html" title="mod libiot::network::application::coap">coap</a></dt><dd>CoAP (Constrained Application Protocol) implementation.</dd><dt><a class="mod" href="http/index.html" title="mod libiot::network::application::http">http</a></dt><dd>HTTP client implementation.</dd><dt><a class="mod" href="mcp/index.html" title="mod libiot::network::application::mcp">mcp</a></dt><dd>MCP (Model Context Protocol) client implementation.</dd><dt><a class="mod" href="mqtt/index.html" title="mod libiot::network::application::mqtt">mqtt</a></dt><dd>MQTT client implementation.</dd><dt><a class="mod" href="websocket/index.html" title="mod libiot::network::application::websocket">websocket</a></dt><dd>WebSocket protocol implementation.</dd></dl></section></div></main></body></html>

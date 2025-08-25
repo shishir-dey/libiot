@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="MCP (Model Context Protocol) client implementation."><title>libiot::network::application::mcp - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-7dc20aaa.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="libiot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.91.0-nightly (809200ec9 2025-08-24)" data-channel="nightly" data-search-js="search-5fc2c5c0.js" data-stringdex-js="stringdex-0e748618.js" data-settings-js="settings-c38705f0.js" ><script src="../../../../static.files/storage-e2aeef58.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../../static.files/main-17c00ba7.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Module mcp</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../../../libiot/index.html">libiot</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module mcp</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#overview" title="Overview">Overview</a><ul><li><a href="#key-concepts" title="Key Concepts">Key Concepts</a></li></ul></li><li><a href="#architecture" title="Architecture">Architecture</a></li><li><a href="#features" title="Features">Features</a></li><li><a href="#usage-examples" title="Usage Examples">Usage Examples</a><ul><li><a href="#basic-function-registration-and-execution" title="Basic Function Registration and Execution">Basic Function Registration and Execution</a></li><li><a href="#custom-function-handler" title="Custom Function Handler">Custom Function Handler</a></li><li><a href="#mcp-client-usage" title="MCP Client Usage">MCP Client Usage</a></li></ul></li></ul><h3><a href="#reexports">Module Items</a></h3><ul class="block"><li><a href="#reexports" title="Re-exports">Re-exports</a></li><li><a href="#modules" title="Modules">Modules</a></li><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li><li><a href="#constants" title="Constants">Constants</a></li><li><a href="#traits" title="Traits">Traits</a></li><li><a href="#types" title="Type Aliases">Type Aliases</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="../index.html">In libiot::<wbr>network::<wbr>application</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../../../index.html">libiot</a>::<wbr><a href="../../index.html">network</a>::<wbr><a href="../index.html">application</a></div><h1>Module <span>mcp</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../../../src/libiot/network/application/mcp/mod.rs.html#1-649">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>MCP (Model Context Protocol) client implementation.</p>
+<p>Enables embedded devices to interact with AI models and language models
+through a standardized protocol interface.
+Model Context Protocol (MCP) Client for Embedded Systems</p>
+<p>This module provides a lightweight MCP client implementation suitable for
+microcontrollers and other <code>no_std</code> environments. It supports receiving
+tool/function calls from LLMs and executing them on-device.</p>
+<h2 id="overview"><a class="doc-anchor" href="#overview">§</a>Overview</h2>
+<p>Model Context Protocol (MCP) is a communication protocol designed to enable
+AI models and language models to interact with external tools and services.
+This implementation allows embedded devices to act as MCP servers, exposing
+device capabilities to AI systems.</p>
+<h3 id="key-concepts"><a class="doc-anchor" href="#key-concepts">§</a>Key Concepts</h3>
+<ul>
+<li><strong>Functions</strong>: Callable operations exposed by the device</li>
+<li><strong>Handlers</strong>: Rust code that implements function logic</li>
+<li><strong>Registry</strong>: A collection of registered functions</li>
+<li><strong>Messages</strong>: JSON-based communication between client and AI model</li>
+</ul>
+<h2 id="architecture"><a class="doc-anchor" href="#architecture">§</a>Architecture</h2>
+<p>The MCP implementation consists of several key components:</p>
+<div class="example-wrap"><pre class="language-text"><code>┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   AI Model  │───▶│ MCP Client  │───▶│  Function   │
+│             │    │             │    │  Registry   │
+└─────────────┘    └─────────────┘    └─────────────┘
+                           │                   │
+                           ▼                   ▼
+                   ┌─────────────┐    ┌─────────────┐
+                   │ Connection  │    │  Handlers   │
+                   │   Layer     │    │             │
+                   └─────────────┘    └─────────────┘</code></pre></div><h2 id="features"><a class="doc-anchor" href="#features">§</a>Features</h2>
+<ul>
+<li><strong>Zero-allocation</strong>: Uses fixed-size buffers for predictable memory usage</li>
+<li><strong>Type Safety</strong>: Strongly typed function signatures and error handling</li>
+<li><strong>Extensible</strong>: Easy to add custom functions and handlers</li>
+<li><strong>Connection Agnostic</strong>: Works with any transport implementing <a href="../../trait.Connection.html" title="trait libiot::network::Connection"><code>Connection</code></a></li>
+<li><strong>JSON Communication</strong>: Standard JSON message format for compatibility</li>
+</ul>
+<h2 id="usage-examples"><a class="doc-anchor" href="#usage-examples">§</a>Usage Examples</h2><h3 id="basic-function-registration-and-execution"><a class="doc-anchor" href="#basic-function-registration-and-execution">§</a>Basic Function Registration and Execution</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>libiot::network::application::mcp::{
+    FunctionRegistry, McpHandler, HandlerResult, register_mcp_functions
+};
+<span class="kw">use </span>libiot::network::application::mcp::handlers::PingHandler;
+
+<span class="comment">// Create a function registry
+</span><span class="kw">let </span><span class="kw-2">mut </span>registry = FunctionRegistry::new();
+
+<span class="comment">// Register built-in handlers
+</span><span class="macro">register_mcp_functions!</span>(registry,
+    (<span class="string">"ping"</span>, PingHandler),
+    (<span class="string">"system_info"</span>, libiot::network::application::mcp::handlers::SystemInfoHandler),
+);
+
+<span class="comment">// Execute a function
+</span><span class="kw">let </span>response = registry.execute(<span class="string">"ping"</span>, <span class="string">r#"{"message": "Hello"}"#</span>);</code></pre></div>
+<h3 id="custom-function-handler"><a class="doc-anchor" href="#custom-function-handler">§</a>Custom Function Handler</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>libiot::network::application::mcp::{McpHandler, HandlerResult, McpError};
+<span class="kw">use </span>heapless::String;
+
+<span class="kw">struct </span>TemperatureHandler {
+    current_temp: f32,
+}
+
+<span class="kw">impl </span>McpHandler <span class="kw">for </span>TemperatureHandler {
+    <span class="kw">fn </span>call(<span class="kw-2">&amp;mut </span><span class="self">self</span>, args: <span class="kw-2">&amp;</span>str) -&gt; HandlerResult {
+        <span class="comment">// Parse arguments and return current temperature
+        </span><span class="kw">let </span>result = <span class="macro">format!</span>(<span class="string">"Temperature: {:.1}°C"</span>, <span class="self">self</span>.current_temp);
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(String::try_from(result.as_str()).map_err(|<span class="kw">_</span>| McpError::BufferOverflow)<span class="question-mark">?</span>))
+    }
+}</code></pre></div>
+<h3 id="mcp-client-usage"><a class="doc-anchor" href="#mcp-client-usage">§</a>MCP Client Usage</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>libiot::network::application::mcp::{McpClient, FunctionRegistry};
+<span class="kw">use </span>libiot::network::application::mcp::handlers::PingHandler;
+
+<span class="kw">let </span>connection = MockConnection;
+<span class="kw">let </span><span class="kw-2">mut </span>registry = FunctionRegistry::new();
+registry.register(<span class="string">"ping"</span>, PingHandler).unwrap();
+
+<span class="kw">let </span><span class="kw-2">mut </span>client = McpClient::new(connection, registry);
+
+<span class="comment">// Process incoming MCP messages
+// loop {
+//     if let Err(e) = client.process_message() {
+//         println!("Error processing message: {:?}", e);
+//     }
+// }</span></code></pre></div>
+</div></details><h2 id="reexports" class="section-header">Re-exports<a href="#reexports" class="anchor">§</a></h2><dl class="item-table reexports"><dt id="reexport.McpClient"><code>pub use client::<a class="struct" href="client/struct.McpClient.html" title="struct libiot::network::application::mcp::client::McpClient">McpClient</a>;</code></dt></dl><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><dl class="item-table"><dt><a class="mod" href="client/index.html" title="mod libiot::network::application::mcp::client">client</a></dt><dd>MCP Client implementation for embedded systems</dd><dt><a class="mod" href="handlers/index.html" title="mod libiot::network::application::mcp::handlers">handlers</a></dt><dd>MCP handler implementations for common embedded operations</dd></dl><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.FunctionRegistry.html" title="struct libiot::network::application::mcp::FunctionRegistry">Function<wbr>Registry</a></dt><dd>Function registry for compile-time function registration.</dd><dt><a class="struct" href="struct.McpMessage.html" title="struct libiot::network::application::mcp::McpMessage">McpMessage</a></dt><dd>Core MCP message structure for function calls.</dd><dt><a class="struct" href="struct.McpResponse.html" title="struct libiot::network::application::mcp::McpResponse">McpResponse</a></dt><dd>Response message structure for function call results.</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.McpError.html" title="enum libiot::network::application::mcp::McpError">McpError</a></dt><dd>Error types for MCP operations.</dd><dt><a class="enum" href="enum.ResponseStatus.html" title="enum libiot::network::application::mcp::ResponseStatus">Response<wbr>Status</a></dt><dd>Status codes for MCP function execution responses.</dd></dl><h2 id="constants" class="section-header">Constants<a href="#constants" class="anchor">§</a></h2><dl class="item-table"><dt><a class="constant" href="constant.MAX_ARGS_LEN.html" title="constant libiot::network::application::mcp::MAX_ARGS_LEN">MAX_<wbr>ARGS_<wbr>LEN</a></dt><dd>Maximum length for JSON argument strings in bytes.</dd><dt><a class="constant" href="constant.MAX_FUNCTIONS.html" title="constant libiot::network::application::mcp::MAX_FUNCTIONS">MAX_<wbr>FUNCTIONS</a></dt><dd>Maximum number of registered functions in the registry.</dd><dt><a class="constant" href="constant.MAX_FUNCTION_NAME_LEN.html" title="constant libiot::network::application::mcp::MAX_FUNCTION_NAME_LEN">MAX_<wbr>FUNCTION_<wbr>NAME_<wbr>LEN</a></dt><dd>Maximum length for function names in characters.</dd><dt><a class="constant" href="constant.MAX_RESPONSE_LEN.html" title="constant libiot::network::application::mcp::MAX_RESPONSE_LEN">MAX_<wbr>RESPONSE_<wbr>LEN</a></dt><dd>Maximum length for response messages in characters.</dd></dl><h2 id="traits" class="section-header">Traits<a href="#traits" class="anchor">§</a></h2><dl class="item-table"><dt><a class="trait" href="trait.McpHandler.html" title="trait libiot::network::application::mcp::McpHandler">McpHandler</a></dt><dd>Function handler trait for MCP functions.</dd></dl><h2 id="types" class="section-header">Type Aliases<a href="#types" class="anchor">§</a></h2><dl class="item-table"><dt><a class="type" href="type.HandlerResult.html" title="type libiot::network::application::mcp::HandlerResult">Handler<wbr>Result</a></dt><dd>Result type for MCP function handlers.</dd></dl></section></div></main></body></html>

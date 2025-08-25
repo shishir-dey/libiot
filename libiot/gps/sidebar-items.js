@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["NMEA_END_CHAR_1","NMEA_END_CHAR_2","NMEA_MAX_LENGTH","NMEA_PREFIX_LENGTH"],"enum":["CardinalDirection","NmeaError","NmeaSentence","NmeaType"],"struct":["Gpgga","Gpgll","Gprmc","NmeaBase","NmeaDate","NmeaParser","NmeaTime","Position"]};

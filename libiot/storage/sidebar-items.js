@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["BlockStatus"],"mod":["error","prelude"],"struct":["SdMmcStatus"],"trait":["AsyncBlockStorage","AsyncErase","AsyncReadStorage","AsyncSectorStorage","AsyncStorage","BlockStorage","BlockingErase","Eeprom","Fram","NandFlash","RamStorage","ReadStorage","Region","SdMmc","SectorStorage","Storage","UnifiedStorage"]};

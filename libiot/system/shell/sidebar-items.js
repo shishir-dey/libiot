@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["ASCII_BACKSPACE","ASCII_CR","ASCII_DEL","ASCII_LF","ASCII_SPACE","MAX_ARGS","MAX_BUFFER_SIZE","MAX_DYNAMIC_COMMANDS"],"enum":["ShellResult"],"struct":["Command","Shell"],"type":["CommandFn","OutputFn"]};

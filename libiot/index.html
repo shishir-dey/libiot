@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="libiot - Rust IoT SDK"><title>libiot - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-7dc20aaa.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="libiot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.91.0-nightly (809200ec9 2025-08-24)" data-channel="nightly" data-search-js="search-5fc2c5c0.js" data-stringdex-js="stringdex-0e748618.js" data-settings-js="settings-c38705f0.js" ><script src="../static.files/storage-e2aeef58.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-17c00ba7.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Crate libiot</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../libiot/index.html">libiot</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section id="rustdoc-toc"><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#libiot---rust-iot-sdk" title="libiot - Rust IoT SDK">libiot - Rust IoT SDK</a><ul><li><a href="#features" title="Features">Features</a></li><li><a href="#usage" title="Usage">Usage</a></li><li><a href="#platform-support" title="Platform Support">Platform Support</a></li><li><a href="#optional-features" title="Optional Features">Optional Features</a></li></ul></li></ul><h3><a href="#modules">Crate Items</a></h3><ul class="block"><li><a href="#modules" title="Modules">Modules</a></li><li><a href="#macros" title="Macros">Macros</a></li></ul></section><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><h1>Crate <span>libiot</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/libiot/lib.rs.html#1-139">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="libiot---rust-iot-sdk"><a class="doc-anchor" href="#libiot---rust-iot-sdk">§</a>libiot - Rust IoT SDK</h2>
+<p>A comprehensive Rust SDK that enables any IoT device to securely connect to the cloud,
+manage data, and interact with cloud services. This library is designed for embedded
+systems and supports <code>no_std</code> environments.</p>
+<h3 id="features"><a class="doc-anchor" href="#features">§</a>Features</h3><h4 id="network-protocols"><a class="doc-anchor" href="#network-protocols">§</a>Network Protocols</h4>
+<ul>
+<li><strong>HTTP Client</strong>: RESTful API communication</li>
+<li><strong>MQTT Client</strong>: Lightweight publish-subscribe messaging</li>
+<li><strong>MCP (Model Context Protocol)</strong>: AI/LLM integration for embedded systems</li>
+<li><strong>WebSocket</strong>: Real-time bidirectional communication</li>
+<li><strong>CoAP</strong>: Constrained Application Protocol for IoT</li>
+</ul>
+<h4 id="storage-abstraction"><a class="doc-anchor" href="#storage-abstraction">§</a>Storage Abstraction</h4>
+<ul>
+<li>Unified storage interface for various memory types</li>
+<li>Support for EEPROM, Flash, SD cards, and RAM</li>
+<li>Async and sync operation modes</li>
+</ul>
+<h4 id="system-utilities"><a class="doc-anchor" href="#system-utilities">§</a>System Utilities</h4>
+<ul>
+<li>Command shell interface for embedded devices</li>
+<li>Extensible command system with built-in help</li>
+</ul>
+<h3 id="usage"><a class="doc-anchor" href="#usage">§</a>Usage</h3>
+<p>Add this to your <code>Cargo.toml</code>:</p>
+<div class="example-wrap"><pre class="language-toml"><code>[dependencies]
+libiot = &quot;0.1.0&quot;</code></pre></div><h4 id="basic-http-client-example"><a class="doc-anchor" href="#basic-http-client-example">§</a>Basic HTTP Client Example</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>libiot::network::application::http::{Client, Request, Method};
+
+<span class="kw">let </span>connection = MockConnection;
+<span class="kw">let </span><span class="kw-2">mut </span>client = Client::new(connection);
+
+<span class="kw">let </span>request = Request {
+    method: Method::Get,
+    path: <span class="string">"/api/data"</span>,
+    headers: heapless::Vec::new(),
+    body: <span class="prelude-val">None</span>,
+};
+
+<span class="comment">// let response = client.request(&amp;request)?;</span></code></pre></div>
+<h4 id="mqtt-client-example"><a class="doc-anchor" href="#mqtt-client-example">§</a>MQTT Client Example</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>libiot::network::application::mqtt::{Client, Options, QoS};
+
+<span class="kw">let </span>connection = MockConnection;
+<span class="kw">let </span>options = Options {
+    client_id: <span class="string">"my_device"</span>,
+    keep_alive_seconds: <span class="number">60</span>,
+    clean_session: <span class="bool-val">true</span>,
+};
+
+<span class="comment">// let mut client = Client::connect(connection, options)?;
+// client.publish("sensors/temperature", b"23.5", QoS::AtMostOnce)?;</span></code></pre></div>
+<h3 id="platform-support"><a class="doc-anchor" href="#platform-support">§</a>Platform Support</h3>
+<p>This library is designed to work on:</p>
+<ul>
+<li>Embedded microcontrollers (ARM Cortex-M, RISC-V, etc.)</li>
+<li>Linux-based IoT devices (Raspberry Pi, etc.)</li>
+<li>Any platform supporting Rust’s <code>core</code> library</li>
+</ul>
+<h3 id="optional-features"><a class="doc-anchor" href="#optional-features">§</a>Optional Features</h3>
+<ul>
+<li><code>std</code>: Enable standard library support (default: disabled)</li>
+<li><code>async</code>: Enable async/await support for non-blocking operations</li>
+<li><code>defmt</code>: Enable defmt logging support for embedded debugging</li>
+</ul>
+</div></details><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><dl class="item-table"><dt><a class="mod" href="gps/index.html" title="mod libiot::gps">gps</a></dt><dd>GPS NMEA 0183 sentence parser</dd><dt><a class="mod" href="network/index.html" title="mod libiot::network">network</a></dt><dd>Network abstraction layer providing protocol implementations and connection management.</dd><dt><a class="mod" href="ota/index.html" title="mod libiot::ota">ota</a></dt><dd>Over-the-air (OTA) update logic combining network and storage layers.
+Over-the-air (OTA) update logic for embedded devices</dd><dt><a class="mod" href="storage/index.html" title="mod libiot::storage">storage</a></dt><dd>Storage abstraction layer for various memory and storage devices.</dd><dt><a class="mod" href="system/index.html" title="mod libiot::system">system</a></dt><dd>System utilities for embedded devices.</dd></dl><h2 id="macros" class="section-header">Macros<a href="#macros" class="anchor">§</a></h2><dl class="item-table"><dt><a class="macro" href="macro.register_mcp_functions.html" title="macro libiot::register_mcp_functions">register_<wbr>mcp_<wbr>functions</a></dt><dd>Convenience macro to register multiple MCP functions at once.</dd></dl></section></div></main></body></html>

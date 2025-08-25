@@ -1,0 +1,97 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Storage abstraction layer for various memory and storage devices."><title>libiot::storage - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-7dc20aaa.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="libiot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.91.0-nightly (809200ec9 2025-08-24)" data-channel="nightly" data-search-js="search-5fc2c5c0.js" data-stringdex-js="stringdex-0e748618.js" data-settings-js="settings-c38705f0.js" ><script src="../../static.files/storage-e2aeef58.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../static.files/main-17c00ba7.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Module storage</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../libiot/index.html">libiot</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module storage</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#storage-abstraction-layer-for-embedded-systems" title="Storage abstraction layer for embedded systems">Storage abstraction layer for embedded systems</a></li><li><a href="#design-philosophy" title="Design Philosophy">Design Philosophy</a></li><li><a href="#architecture-overview" title="Architecture Overview">Architecture Overview</a></li><li><a href="#core-traits" title="Core Traits">Core Traits</a><ul><li><a href="#basic-storage-operations" title="Basic Storage Operations">Basic Storage Operations</a></li><li><a href="#organization-traits" title="Organization Traits">Organization Traits</a></li><li><a href="#technology-specific-traits" title="Technology-Specific Traits">Technology-Specific Traits</a></li></ul></li><li><a href="#usage-examples" title="Usage Examples">Usage Examples</a><ul><li><a href="#basic-storage-operations-1" title="Basic Storage Operations">Basic Storage Operations</a></li><li><a href="#block-based-storage" title="Block-Based Storage">Block-Based Storage</a></li><li><a href="#flash-memory-with-erase" title="Flash Memory with Erase">Flash Memory with Erase</a></li></ul></li></ul><h3><a href="#modules">Module Items</a></h3><ul class="block"><li><a href="#modules" title="Modules">Modules</a></li><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li><li><a href="#traits" title="Traits">Traits</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="../index.html">In crate libiot</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">libiot</a></div><h1>Module <span>storage</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/libiot/storage/mod.rs.html#1-873">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Storage abstraction layer for various memory and storage devices.</p>
+<p>Provides unified interfaces for different storage technologies including
+Flash memory, EEPROM, SD cards, and RAM-based storage.</p>
+<h2 id="storage-abstraction-layer-for-embedded-systems"><a class="doc-anchor" href="#storage-abstraction-layer-for-embedded-systems">§</a>Storage abstraction layer for embedded systems</h2>
+<p>This module provides a comprehensive set of traits and implementations for working with
+different types of storage devices in embedded systems. It includes traits for both
+synchronous and asynchronous operations, as well as support for various storage technologies.</p>
+<h2 id="design-philosophy"><a class="doc-anchor" href="#design-philosophy">§</a>Design Philosophy</h2>
+<p>The storage layer is designed around several core principles:</p>
+<ul>
+<li><strong>Technology Agnostic</strong>: Core traits work with any storage technology</li>
+<li><strong>Zero-Cost Abstractions</strong>: Traits compile down to direct hardware calls</li>
+<li><strong>Embedded-First</strong>: Designed for <code>no_std</code> environments with limited resources</li>
+<li><strong>Safety</strong>: Strong typing prevents common storage access errors</li>
+<li><strong>Composable</strong>: Mix and match different storage types and interfaces</li>
+</ul>
+<h2 id="architecture-overview"><a class="doc-anchor" href="#architecture-overview">§</a>Architecture Overview</h2>
+<p>The storage layer is organized into several abstraction levels:</p>
+<div class="example-wrap"><pre class="language-text"><code>┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Application   │    │   File System   │    │     Cache       │
+│     Layer       │    │     Layer       │    │     Layer       │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+          │                        │                        │
+          ▼                        ▼                        ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Storage Abstraction Layer                    │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────────┐  │
+│  │  Core Traits  │  │  Block/Sector │  │  Technology       │  │
+│  │               │  │  Management   │  │  Specific Traits  │  │
+│  └───────────────┘  └───────────────┘  └───────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+          │                        │                        │
+          ▼                        ▼                        ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Flash Memory  │    │   EEPROM/FRAM   │    │   SD/MMC Cards  │
+│   (NOR/NAND)    │    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘</code></pre></div><h2 id="core-traits"><a class="doc-anchor" href="#core-traits">§</a>Core Traits</h2><h3 id="basic-storage-operations"><a class="doc-anchor" href="#basic-storage-operations">§</a>Basic Storage Operations</h3>
+<ul>
+<li>[<code>ReadStorage</code>]: Read data from storage</li>
+<li>[<code>Storage</code>]: Read and write operations</li>
+<li>[<code>BlockingErase</code>]: Synchronous erase operations</li>
+<li>[<code>AsyncStorage</code>]: Asynchronous storage operations (with <code>async</code> feature)</li>
+</ul>
+<h3 id="organization-traits"><a class="doc-anchor" href="#organization-traits">§</a>Organization Traits</h3>
+<ul>
+<li>[<code>BlockStorage</code>]: Block-oriented storage (SD cards, NAND flash)</li>
+<li>[<code>SectorStorage</code>]: Sector-oriented storage (NOR flash)</li>
+<li>[<code>Region</code>]: Memory region management</li>
+</ul>
+<h3 id="technology-specific-traits"><a class="doc-anchor" href="#technology-specific-traits">§</a>Technology-Specific Traits</h3>
+<ul>
+<li>[<code>Eeprom</code>]: EEPROM-specific operations</li>
+<li>[<code>NandFlash</code>]: NAND flash with spare area support</li>
+<li>[<code>SdMmc</code>]: SD/MMC card operations</li>
+<li>[<code>Fram</code>]: Ferroelectric RAM operations</li>
+<li>[<code>RamStorage</code>]: RAM-based storage</li>
+</ul>
+<h2 id="usage-examples"><a class="doc-anchor" href="#usage-examples">§</a>Usage Examples</h2><h3 id="basic-storage-operations-1"><a class="doc-anchor" href="#basic-storage-operations-1">§</a>Basic Storage Operations</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>libiot::storage::{ReadStorage, Storage};
+
+<span class="kw">fn </span>read_sensor_data&lt;S: ReadStorage&gt;(storage: <span class="kw-2">&amp;mut </span>S) -&gt; <span class="prelude-ty">Result</span>&lt;[u8; <span class="number">4</span>], S::Error&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>data = [<span class="number">0u8</span>; <span class="number">4</span>];
+    storage.read(<span class="number">0x1000</span>, <span class="kw-2">&amp;mut </span>data)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(data)
+}
+
+<span class="kw">fn </span>store_configuration&lt;S: Storage&gt;(storage: <span class="kw-2">&amp;mut </span>S, config: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), S::Error&gt; {
+    storage.write(<span class="number">0x2000</span>, config)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<h3 id="block-based-storage"><a class="doc-anchor" href="#block-based-storage">§</a>Block-Based Storage</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>libiot::storage::{BlockStorage, Storage};
+
+<span class="kw">fn </span>read_block&lt;S: Storage + BlockStorage&gt;(storage: <span class="kw-2">&amp;mut </span>S, block_num: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, S::Error&gt; {
+    <span class="kw">let </span>block_size = storage.block_size();
+    <span class="kw">let </span><span class="kw-2">mut </span>buffer = <span class="macro">vec!</span>[<span class="number">0u8</span>; block_size];
+    <span class="kw">let </span>offset = (block_num * block_size) <span class="kw">as </span>u32;
+    storage.read(offset, <span class="kw-2">&amp;mut </span>buffer)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(buffer)
+}</code></pre></div>
+<h3 id="flash-memory-with-erase"><a class="doc-anchor" href="#flash-memory-with-erase">§</a>Flash Memory with Erase</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>libiot::storage::{Storage, BlockingErase};
+
+<span class="kw">fn </span>update_firmware_block&lt;S: Storage + BlockingErase&gt;(
+    storage: <span class="kw-2">&amp;mut </span>S,
+    start_addr: u32,
+    end_addr: u32,
+    new_data: <span class="kw-2">&amp;</span>[u8]
+) -&gt; <span class="prelude-ty">Result</span>&lt;(), S::Error&gt; {
+    <span class="comment">// Erase the region first
+    </span>storage.erase(start_addr, end_addr)<span class="question-mark">?</span>;
+    <span class="comment">// Write new data
+    </span>storage.write(start_addr, new_data)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+</div></details><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><dl class="item-table"><dt><a class="mod" href="error/index.html" title="mod libiot::storage::error">error</a></dt><dd>Common error types for storage operations
+Common error types for storage operations.</dd><dt><a class="mod" href="prelude/index.html" title="mod libiot::storage::prelude">prelude</a></dt><dd>Re-exports of common traits for convenient importing</dd></dl><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.SdMmcStatus.html" title="struct libiot::storage::SdMmcStatus">SdMmc<wbr>Status</a></dt><dd>SD/MMC card status information.</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.BlockStatus.html" title="enum libiot::storage::BlockStatus">Block<wbr>Status</a></dt><dd>NAND Flash block status.</dd></dl><h2 id="traits" class="section-header">Traits<a href="#traits" class="anchor">§</a></h2><dl class="item-table"><dt><a class="trait" href="trait.AsyncBlockStorage.html" title="trait libiot::storage::AsyncBlockStorage">Async<wbr>Block<wbr>Storage</a></dt><dd>Asynchronous block-oriented storage operations.</dd><dt><a class="trait" href="trait.AsyncErase.html" title="trait libiot::storage::AsyncErase">Async<wbr>Erase</a></dt><dd>Trait for storage devices that support erase operations asynchronously.</dd><dt><a class="trait" href="trait.AsyncReadStorage.html" title="trait libiot::storage::AsyncReadStorage">Async<wbr>Read<wbr>Storage</a></dt><dd>Trait for reading data from storage devices asynchronously.</dd><dt><a class="trait" href="trait.AsyncSectorStorage.html" title="trait libiot::storage::AsyncSectorStorage">Async<wbr>Sector<wbr>Storage</a></dt><dd>Asynchronous sector-oriented storage operations.</dd><dt><a class="trait" href="trait.AsyncStorage.html" title="trait libiot::storage::AsyncStorage">Async<wbr>Storage</a></dt><dd>Trait for storage devices that support both read and write operations asynchronously.</dd><dt><a class="trait" href="trait.BlockStorage.html" title="trait libiot::storage::BlockStorage">Block<wbr>Storage</a></dt><dd>Block-oriented storage interface.</dd><dt><a class="trait" href="trait.BlockingErase.html" title="trait libiot::storage::BlockingErase">Blocking<wbr>Erase</a></dt><dd>Trait for storage devices that support erase operations.</dd><dt><a class="trait" href="trait.Eeprom.html" title="trait libiot::storage::Eeprom">Eeprom</a></dt><dd>EEPROM-specific storage operations.</dd><dt><a class="trait" href="trait.Fram.html" title="trait libiot::storage::Fram">Fram</a></dt><dd>FRAM (Ferroelectric RAM) operations.</dd><dt><a class="trait" href="trait.NandFlash.html" title="trait libiot::storage::NandFlash">Nand<wbr>Flash</a></dt><dd>NAND Flash specific operations.</dd><dt><a class="trait" href="trait.RamStorage.html" title="trait libiot::storage::RamStorage">RamStorage</a></dt><dd>RAM-based storage operations.</dd><dt><a class="trait" href="trait.ReadStorage.html" title="trait libiot::storage::ReadStorage">Read<wbr>Storage</a></dt><dd>Trait for reading data from storage devices.</dd><dt><a class="trait" href="trait.Region.html" title="trait libiot::storage::Region">Region</a></dt><dd>A contiguous memory region with start and end boundaries.</dd><dt><a class="trait" href="trait.SdMmc.html" title="trait libiot::storage::SdMmc">SdMmc</a></dt><dd>SD/MMC card specific operations.</dd><dt><a class="trait" href="trait.SectorStorage.html" title="trait libiot::storage::SectorStorage">Sector<wbr>Storage</a></dt><dd>Sector-oriented storage interface.</dd><dt><a class="trait" href="trait.Storage.html" title="trait libiot::storage::Storage">Storage</a></dt><dd>Trait for storage devices that support both read and write operations.</dd><dt><a class="trait" href="trait.UnifiedStorage.html" title="trait libiot::storage::UnifiedStorage">Unified<wbr>Storage</a></dt><dd>Unified storage interface for both volatile and non-volatile storage.</dd></dl></section></div></main></body></html>
