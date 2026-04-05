@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"macro":["register_mcp_functions"],"mod":["gps","network","ota","storage","system"]};
