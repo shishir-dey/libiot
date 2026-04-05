@@ -95,7 +95,6 @@
 //! > path "C:\\Program Files"     # Escaped backslashes
 //! ```
 
-use core::array;
 use core::str;
 
 /// Maximum buffer size for input command lines.

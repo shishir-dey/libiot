@@ -112,7 +112,6 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(missing_docs)]
-#![warn(missing_debug_implementations)]
 #![doc(html_root_url = "https://shishir-dey.github.io/libiot/")]
 
 /// Network abstraction layer providing protocol implementations and connection management.
