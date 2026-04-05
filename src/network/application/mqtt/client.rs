@@ -96,8 +96,8 @@
 //! ```
 
 //! An MQTT client implementation based on the MQTT 3.1.1 specification.
+use crate::network::Connection;
 use crate::network::error::Error;
-use crate::network::{Connection, Read, Write};
 use heapless::{String, Vec};
 
 // MQTT Control Packet types - these are the fixed header packet type values
@@ -294,6 +294,19 @@ pub struct Client<C: Connection> {
 }
 
 impl<C: Connection> Client<C> {
+    /// Returns whether the MQTT session is currently considered connected.
+    pub fn is_connected(&self) -> bool {
+        self.is_connected
+    }
+
+    fn ensure_connected(&self) -> Result<(), Error> {
+        if self.is_connected {
+            Ok(())
+        } else {
+            Err(Error::NotOpen)
+        }
+    }
+
     /// Establish an MQTT connection with the broker.
     ///
     /// This function performs the MQTT connection handshake by sending a CONNECT
@@ -497,6 +510,8 @@ impl<C: Connection> Client<C> {
     /// // client.publish("devices/sensor01/data", json_data, QoS::AtLeastOnce)?;
     /// ```
     pub fn publish(&mut self, topic: &str, payload: &[u8], qos: QoS) -> Result<(), Error> {
+        self.ensure_connected()?;
+
         let mut fixed_header: Vec<u8, 5> = Vec::new();
         let mut packet: Vec<u8, 1024> = Vec::new();
 
@@ -596,6 +611,8 @@ impl<C: Connection> Client<C> {
     /// // client.subscribe("commands/#", QoS::ExactlyOnce)?;
     /// ```
     pub fn subscribe(&mut self, topic: &str, qos: QoS) -> Result<(), Error> {
+        self.ensure_connected()?;
+
         let mut fixed_header: Vec<u8, 5> = Vec::new();
         let mut packet: Vec<u8, 1024> = Vec::new();
 
@@ -629,7 +646,10 @@ impl<C: Connection> Client<C> {
         let mut total_read = 0;
         while total_read < suback_buf.len() {
             match self.connection.read(&mut suback_buf[total_read..]) {
-                Ok(0) => return Err(Error::ConnectionClosed),
+                Ok(0) => {
+                    self.is_connected = false;
+                    return Err(Error::ConnectionClosed);
+                }
                 Ok(n) => total_read += n,
                 Err(_) => return Err(Error::ReadError),
             }
@@ -721,9 +741,14 @@ impl<C: Connection> Client<C> {
     /// no data is available. For blocking behavior, call it in a loop with
     /// appropriate delays.
     pub fn poll(&mut self) -> Result<Option<PublishPacket>, Error> {
+        self.ensure_connected()?;
+
         let mut header_buf = [0u8; 1];
         match self.connection.read(&mut header_buf) {
-            Ok(0) => return Ok(None),
+            Ok(0) => {
+                self.is_connected = false;
+                return Err(Error::ConnectionClosed);
+            }
             Ok(_) => {}
             Err(_) => return Err(Error::ReadError),
         }

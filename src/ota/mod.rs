@@ -439,12 +439,11 @@ fn parse_content_range(value: &str) -> Option<(usize, usize, Option<usize>)> {
     // bytes start-end/total
     // bytes start-end/*
     let v = value.trim();
-    // Normalize unit prefix
-    let lower = v.to_ascii_lowercase();
-    let rest = lower.strip_prefix("bytes")?;
-    // Derive the rest slice from original string to keep original digits
-    let start_idx = v.len() - rest.len();
-    let v_rest = &v[start_idx..].trim();
+    let prefix = v.get(..5)?;
+    if !prefix.eq_ignore_ascii_case("bytes") {
+        return None;
+    }
+    let v_rest = v.get(5..)?.trim();
     // Now expect start-end/total
     let mut parts = v_rest.split('/');
     let range_part = parts.next()?.trim();
@@ -507,9 +506,11 @@ impl<'a, C: crate::network::Connection> MqttProgress<'a, C> {
             total: p.bytes_total,
             state: state_str,
         };
-        let encoded: Vec<u8, 128> = serde_json_core::to_vec(&body).map_err(|_| Error::Protocol)?;
+        let mut encoded = [0u8; 128];
+        let encoded_len =
+            serde_json_core::to_slice(&body, &mut encoded).map_err(|_| Error::Protocol)?;
         self.client
-            .publish(self.topic, &encoded, QoS::AtMostOnce)
+            .publish(self.topic, &encoded[..encoded_len], QoS::AtMostOnce)
             .map_err(Error::from)
     }
 }
